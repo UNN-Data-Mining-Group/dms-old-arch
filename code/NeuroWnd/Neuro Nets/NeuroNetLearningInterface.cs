@@ -8,18 +8,6 @@ using LearningAlgorithms;
 
 namespace NeuroWnd.Neuro_Nets
 {
-    public class NeuronLocation
-    {
-        public int Layer;
-        public int Number;
-
-        public NeuronLocation(int _layer, int _number)
-        {
-            Layer = _layer;
-            Number = _number;
-        }
-    }
-
     public class NeuroNetLearningInterface : LearningAlgorithms.INeuroNetLearning
     {
         private DataBaseHandler dbHandler;
@@ -28,9 +16,54 @@ namespace NeuroWnd.Neuro_Nets
         private string selectionName;
 
         public int CountLayers { get { return learned_net.NeuronsInLayers.GetLength(0); } }
-        public int CountNeurons { get { return learned_net.NeuronsCount; } }
+        public bool IsRecursive { get; private set; }
+        public int CountOfNeurons { get { return learned_net.NeuronsCount; } }
         public int CountInputNeurons { get { return learned_net.InputNeuronsCount; } }
         public int CountOutputNeurons { get { return learned_net.OutputNeuronsCount; } }
+        public double[] GetOutputsOfAllNeurons(double[] x)
+        {
+            learned_net.MakeAnswer(x);
+            double[] res = new double[learned_net.NeuronsCount];
+            for (int i = 0; i < learned_net.NeuronsCount; i++)
+            {
+                Neuron n = learned_net.GetNeuron(i);
+                res[i] = n.OutputValue;
+            }
+            return res;
+        }
+
+        public double GetAfDerivative(int neuronIndex, double x)
+        {
+            ActivateFunction af = learned_net.GetNeuron(neuronIndex).ActivateFunctionOfNeuron;
+            return af.Derivative(x);
+        }
+
+        public double GetWeightedSum(int neuronIndex)
+        {
+            bool[,] topology = learned_net.ConnectionsOfNeurons;
+            double[,] weights = learned_net.WeightsOfConnections;
+
+            double res = 0.0;
+            for (int i = 0; i < neuronIndex; i++)
+            {
+                if (topology[i, neuronIndex])
+                    res += weights[i, neuronIndex]*learned_net.GetNeuron(i).OutputValue;
+            }
+            return res;
+        }
+
+        public int[] GetChilds(int neuronIndex)
+        {
+            List<int> childs = new List<int>();
+            bool[,] topology = learned_net.ConnectionsOfNeurons;
+            for (int i = neuronIndex + 1; i < learned_net.NeuronsCount; i++)
+            {
+                if (topology[neuronIndex, i])
+                    childs.Add(i);
+            }
+            return childs.ToArray();
+        }
+
         public bool IsIterationsFinished { get { return learned_net.IsIterationsFinished; } }
         public bool IsWaveCameToOutputNeuron { get { return learned_net.IsWaveCameToOutputNeuron; } }
 
@@ -64,53 +97,18 @@ namespace NeuroWnd.Neuro_Nets
                 "Запись обученных весов в БД");
         }
 
-        private Neuron getNeuron(NeuronLocation location)
+        public bool IsWithSmoothActivateFunctions
         {
-            return learned_net.GetNeuron(getNeuronIndexInNet(location));
-        }
-        private int getNeuronIndexInNet(NeuronLocation location)
-        {
-            if (location.Layer < 1 || location.Layer > learned_net.NeuronsInLayers.GetLength(0))
-                throw new Exception("Invalid index of layer");
-
-            int index = 0;
-            for (int i = 0; i < location.Layer - 1; i++)
+            get
             {
-                index += learned_net.NeuronsInLayers[i];
-            }
-
-            if (index + location.Number > learned_net.NeuronsCount ||
-                index + location.Number < 1)
-                throw new Exception("Invalid number of neuron in layer");
-
-            return index + location.Number - 1;
-        }
-        private NeuronLocation getNeuronLocation(Neuron neuron)
-        {
-            int index = learned_net.GetIndexNeuron(neuron);
-            if (index >= 0)
-            {
-                int layer = 1;
-                int number = 1;
-
-                int curInd = 0;
-                for (int i = 0; i < learned_net.NeuronsInLayers.GetLength(0); i++)
+                for (int i = 0; i < learned_net.NeuronsCount; i++)
                 {
-                    int nextInd = curInd + learned_net.NeuronsInLayers[i];
-                    if (index < nextInd && index >= curInd)
-                    {
-                        number = index - curInd + 1;
-                        break;
-                    }
-                    curInd = nextInd;
-                    layer++;
+                    if (!learned_net.GetNeuron(i).
+                        ActivateFunctionOfNeuron.
+                        HasContinuousDerivative)
+                        return false;
                 }
-
-                return new NeuronLocation(layer, number);
-            }
-            else
-            {
-                return null;
+                return true;
             }
         }
 
@@ -128,168 +126,6 @@ namespace NeuroWnd.Neuro_Nets
             netName = inn.netName;
             selectionName = inn.selectionName;
         }
-
-        public int GetCountNeuronsInLayer(int layerIndex)
-        {
-            if (layerIndex < 1 || layerIndex > learned_net.NeuronsInLayers.GetLength(0))
-                throw new Exception("Invalid index of layer");
-
-            return learned_net.NeuronsInLayers[layerIndex - 1];
-        }
-        public NeuronLocation[] GetInputsOfNeuron(NeuronLocation neuronLocation)
-        {
-            int indexCurNeuron = getNeuronIndexInNet(neuronLocation);
-            Neuron neu = getNeuron(neuronLocation);
-            NeuronLocation[] arr = new NeuronLocation[neu.InputsCount];
-
-            int k = 0;
-            for (int i = 0; i < learned_net.NeuronsCount; i++)
-            {
-                if (learned_net.ConnectionsOfNeurons[i, indexCurNeuron] == true)
-                {
-                    arr[k] = getNeuronLocation(learned_net.GetNeuron(i));
-                    k++;
-                }
-            }
-
-            return arr;
-        }
-        public NeuronLocation[] GetOutputsOfNeuron(NeuronLocation neuronLocation)
-        {
-            int indexCurNeuron = getNeuronIndexInNet(neuronLocation);
-            Neuron neu = getNeuron(neuronLocation);
-            
-            int k = 0;
-            for (int i = 0; i < learned_net.NeuronsCount; i++)
-            {
-                if (learned_net.ConnectionsOfNeurons[indexCurNeuron, i] == true)
-                {
-                    k++;
-                }
-            }
-
-            NeuronLocation[] arr = new NeuronLocation[k];
-            k = 0;
-            for (int i = 0; i < learned_net.NeuronsCount; i++)
-            {
-                if (learned_net.ConnectionsOfNeurons[indexCurNeuron, i] == true)
-                {
-                    arr[k] = getNeuronLocation(learned_net.GetNeuron(i));
-                }
-            }
-
-            return arr;
-        }
-        public bool IsConnection(NeuronLocation input, NeuronLocation output)
-        {
-            int indexInput = getNeuronIndexInNet(input);
-            int indexOutput = getNeuronIndexInNet(output);
-
-            return learned_net.ConnectionsOfNeurons[indexOutput, indexInput];
-        }
-        public double GetConnectionWeight(NeuronLocation input, NeuronLocation output)
-        {
-            int indexInput = getNeuronIndexInNet(input);
-            int indexOutput = getNeuronIndexInNet(output);
-            return learned_net.WeightsOfConnections[indexOutput, indexInput];
-        }
-        public Tuple<double, NeuronLocation>[] GetInputsOfNeuronWithWeights(NeuronLocation location)
-        {
-            NeuronLocation[] loc = GetInputsOfNeuron(location);
-            Tuple<double, NeuronLocation>[] res = new Tuple<double, NeuronLocation>[loc.Length];
-            for (int i = 0; i < loc.Length; i++)
-            {
-                res[i] = new Tuple<double, NeuronLocation>(GetConnectionWeight(loc[i], location), loc[i]);
-            }
-            return res;
-        }
-        public void ChangeConnectionWeight(NeuronLocation input, NeuronLocation output, double weight)
-        {
-            Neuron inp = getNeuron(input);
-            Neuron oup = getNeuron(output);
-            if (IsConnection(input, output) == true)
-            {
-                int indexOut = getNeuronIndexInNet(output);
-                inp.SetWeightValue(weight, indexOut);
-            }
-            else
-            {
-                throw new Exception("Связь между нейронами не найдена");
-            }
-        }
-        public void SetNewConnection(NeuronLocation input, NeuronLocation output, double weight)
-        {
-            Neuron inp = getNeuron(input);
-            Neuron oup = getNeuron(output);
-            if (IsConnection(input, output) == true)
-            {
-                throw new Exception("Связь между нейронами уже существует");
-            }
-            else
-            {
-                int indexIn = getNeuronIndexInNet(input);
-                int indexOut = getNeuronIndexInNet(output);
-
-                learned_net.SetNewConnection(indexIn, indexOut, weight);
-            }
-        }
-        public void DeleteConnection(NeuronLocation input, NeuronLocation output)
-        {
-            int indexIn = getNeuronIndexInNet(input);
-            int indexOut = getNeuronIndexInNet(output);
-
-            learned_net.DeleteConnection(indexIn, indexOut);
-        }
-        public double GetOutputValueOfNeuron(NeuronLocation neuron)
-        {
-            return getNeuron(neuron).OutputValue;
-        }
-        public string GetNameOfAF(NeuronLocation neuron)
-        {
-            Neuron n = getNeuron(neuron);
-            return n.ActivateFunctionOfNeuron.Name;
-        }
-        public bool HasAFContinuousDerivative(NeuronLocation neuron)
-        {
-            Neuron n = getNeuron(neuron);
-            return n.ActivateFunctionOfNeuron.HasContinuousDerivative;
-        }
-        public int GetCountParametersAF(NeuronLocation neuron)
-        {
-            Neuron n = getNeuron(neuron);
-            return n.ActivateFunctionOfNeuron.CountParameters;
-        }
-        public string[] GetNamesOfParametersAF(NeuronLocation neuron)
-        {
-            Neuron n = getNeuron(neuron);
-            string[] res = new string[GetCountParametersAF(neuron)];
-            for (int i = 0; i < res.Length; i++)
-            {
-                res[i] = n.ActivateFunctionOfNeuron.GetNameOfParameter(i);
-            }
-            return res;
-        }
-        public double GetValueOfParameterAF(NeuronLocation neuron, string parameterName)
-        {
-            Neuron n = getNeuron(neuron);
-            return n.ActivateFunctionOfNeuron.GetValueOfParameter(parameterName);
-        }
-        public void SetValueOfParameterAF(NeuronLocation neuron, string parameterName, double value)
-        {
-            Neuron n = getNeuron(neuron);
-            n.ActivateFunctionOfNeuron.SetValueOfParameter(parameterName, value);
-        }
-        public double GetAFValue(NeuronLocation neuron, double x)
-        {
-            Neuron n = getNeuron(neuron);
-            return n.ActivateFunctionOfNeuron.Function(x);
-        }
-        public double GetDerivativeAFValue(NeuronLocation neuron, double x)
-        {
-            Neuron n = getNeuron(neuron);
-            return n.ActivateFunctionOfNeuron.Derivative(x);
-        }
-
         public void ResetNeuroNet()
         {
             learned_net.ResetNeuroNet();

@@ -466,11 +466,19 @@ namespace NeuroWnd
             NeuroNetLearningInterface Inn = new NeuroNetLearningInterface(net, lbNetSelected.Text,
                 lbSelSelected.Text, dbHandler);
 
-            //Here would be call of learning algorithms form
             double[,] selection = dbHandler.SelectLearningSelection(lbSelSelected.Text);
-            GeneticAlgorithmForm fm = new GeneticAlgorithmForm(Inn, selection);
-            fm.ShowDialog();
-            //End of calling LA
+
+
+            if (lbLASelected.Text.Equals("Генетический алгоритм"))
+            {
+                GeneticAlgorithmForm fm = new GeneticAlgorithmForm(Inn, selection);
+                fm.ShowDialog();
+            }
+            else if (lbLASelected.Text.Equals("Алгоритм обратного распространения ошибки"))
+            {
+                BackPropagationAlgorithmForm fm = new BackPropagationAlgorithmForm(Inn, selection);
+                fm.ShowDialog();
+            }
 
             LoadInformationForUsingNeuroNets();
         }

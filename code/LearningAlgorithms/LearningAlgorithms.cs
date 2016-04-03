@@ -17,6 +17,14 @@ namespace LearningAlgorithms
         double get_res(double[] X);
         INeuroNetLearning copy();
         void write_result(string algorithm);
+        bool IsWithSmoothActivateFunctions { get; }
+        bool IsRecursive { get; }
+        int CountOfNeurons { get; }
+        int CountOutputNeurons { get; }
+        double[] GetOutputsOfAllNeurons(double[] x);
+        double GetAfDerivative(int neuronIndex, double x);
+        double GetWeightedSum(int neuronIndex);
+        int[] GetChilds(int neuronIndex);
     }
 
     public abstract class LearningAlgorithm
