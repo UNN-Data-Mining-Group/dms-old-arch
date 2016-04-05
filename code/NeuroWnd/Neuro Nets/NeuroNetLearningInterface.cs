@@ -126,21 +126,5 @@ namespace NeuroWnd.Neuro_Nets
             netName = inn.netName;
             selectionName = inn.selectionName;
         }
-        public void ResetNeuroNet()
-        {
-            learned_net.ResetNeuroNet();
-        }
-        public double[] MakeStep(double[] inputs)
-        {
-            return learned_net.MakeStep(inputs);
-        }
-        public double[] MakeIteration(double[] inputs)
-        {
-            return learned_net.MakeIteration(inputs);
-        }
-        public double[] MakeAnswer(double[] inputs, double eps = 1E-16)
-        {
-            return learned_net.MakeAnswer(inputs, eps);
-        }
     }
 }

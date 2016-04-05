@@ -38,6 +38,8 @@
             this.lbTrainPercent = new System.Windows.Forms.Label();
             this.tbTrainPercent = new System.Windows.Forms.TextBox();
             this.lbCurrentIter = new System.Windows.Forms.Label();
+            this.btnWriteResult = new System.Windows.Forms.Button();
+            this.chbErrorPercent = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // btnLearn
@@ -128,11 +130,33 @@
             this.lbCurrentIter.TabIndex = 9;
             this.lbCurrentIter.Text = "label1";
             // 
+            // btnWriteResult
+            // 
+            this.btnWriteResult.Location = new System.Drawing.Point(273, 57);
+            this.btnWriteResult.Name = "btnWriteResult";
+            this.btnWriteResult.Size = new System.Drawing.Size(117, 39);
+            this.btnWriteResult.TabIndex = 10;
+            this.btnWriteResult.Text = "Записать результат в БД";
+            this.btnWriteResult.UseVisualStyleBackColor = true;
+            this.btnWriteResult.Click += new System.EventHandler(this.btnWriteResult_Click);
+            // 
+            // chbErrorPercent
+            // 
+            this.chbErrorPercent.AutoSize = true;
+            this.chbErrorPercent.Location = new System.Drawing.Point(182, 189);
+            this.chbErrorPercent.Name = "chbErrorPercent";
+            this.chbErrorPercent.Size = new System.Drawing.Size(208, 17);
+            this.chbErrorPercent.TabIndex = 11;
+            this.chbErrorPercent.Text = "Ошибка: процент неверных ответов";
+            this.chbErrorPercent.UseVisualStyleBackColor = true;
+            // 
             // BackPropagationAlgorithmForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(398, 187);
+            this.ClientSize = new System.Drawing.Size(398, 218);
+            this.Controls.Add(this.chbErrorPercent);
+            this.Controls.Add(this.btnWriteResult);
             this.Controls.Add(this.lbCurrentIter);
             this.Controls.Add(this.lbTrainPercent);
             this.Controls.Add(this.tbTrainPercent);
@@ -166,5 +190,7 @@
         private System.Windows.Forms.Label lbTrainPercent;
         private System.Windows.Forms.TextBox tbTrainPercent;
         private System.Windows.Forms.Label lbCurrentIter;
+        private System.Windows.Forms.Button btnWriteResult;
+        private System.Windows.Forms.CheckBox chbErrorPercent;
     }
 }

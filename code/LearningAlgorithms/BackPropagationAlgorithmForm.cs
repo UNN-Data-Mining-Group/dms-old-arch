@@ -13,6 +13,9 @@ namespace LearningAlgorithms
     {
         private INeuroNetLearning neuroNet;
         private DataSet dataSet;
+        private bool isLearningCompleted = false;
+        private bool isPercentError;
+
         public BackPropagationAlgorithmForm(INeuroNetLearning solver, double[,] trainingSet)
         {
             neuroNet = solver;
@@ -30,13 +33,17 @@ namespace LearningAlgorithms
 
             InitializeComponent();
 
+            btnWriteResult.Enabled = false;
+
             lbTestError.Text = "";
             lbTrainError.Text = "";
             lbCurrentIter.Text = "";
         }
 
-        private void btnLearn_Click(object sender, EventArgs e)
+        private void learn(object sender, DoWorkEventArgs e)
         {
+            BackgroundWorker worker = sender as BackgroundWorker;
+            
             try
             {
                 int iterations = Convert.ToInt32(tbIterationNumber.Text);
@@ -78,6 +85,7 @@ namespace LearningAlgorithms
 
                 int currentIteration = 0;
                 bool isFirstIteration = true;
+
                 do
                 {
                     learner.Learn(!isFirstIteration);
@@ -90,29 +98,78 @@ namespace LearningAlgorithms
                     for (int i = 0; i < train.Size; i++)
                     {
                         double y = neuroNet.get_res(train.GetX(i));
-                        //trainError += Math.Pow(y - train.GetY(i), 2.0);
-                        trainError += Convert.ToDouble(Convert.ToInt32(y) != Convert.ToInt32(train.GetY(i)));
+
+                        if (isPercentError)
+                            trainError += Convert.ToDouble(Convert.ToInt32(y) != Convert.ToInt32(train.GetY(i)));
+                        else
+                            trainError += Math.Pow(y - train.GetY(i), 2.0);
                     }
                     trainError /= train.Size;
 
                     for (int i = 0; i < test.Size; i++)
                     {
                         double y = neuroNet.get_res(test.GetX(i));
-                        //testError += Math.Pow(y - test.GetY(i), 2.0);
-                        testError += Convert.ToDouble(Convert.ToInt32(y) != Convert.ToInt32(test.GetY(i)));
+
+                        if (isPercentError)
+                            testError += Convert.ToDouble(Convert.ToInt32(y) != Convert.ToInt32(test.GetY(i)));
+                        else
+                            testError += Math.Pow(y - test.GetY(i), 2.0);
                     }
                     testError /= test.Size;
 
-                    lbTestError.Text = String.Format("Ошибка на тестовой выборке: {0}", testError);
-                    lbTrainError.Text = String.Format("Ошибка на обучающей выборке: {0}", trainError);
-                    lbCurrentIter.Text = String.Format("Итерация {0} из {1}", currentIteration, iterations);
+                    worker.ReportProgress(0, new List<double>{trainError, testError, currentIteration, iterations});
                 } 
                 while (currentIteration < iterations);
+
+                isLearningCompleted = true;
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                isLearningCompleted = false;
             }
+            
+        }
+
+        private void btnLearn_Click(object sender, EventArgs e)
+        {
+            btnLearn.Enabled = false;
+
+            isPercentError = chbErrorPercent.Checked;
+
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.DoWork += learn;
+            worker.ProgressChanged += WorkerOnProgressChanged;
+            worker.RunWorkerCompleted += WorkerOnRunWorkerCompleted;
+            worker.WorkerSupportsCancellation = false;
+            worker.WorkerReportsProgress = true;
+
+            worker.RunWorkerAsync();
+        }
+
+        private void WorkerOnRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs runWorkerCompletedEventArgs)
+        {
+            if (!isLearningCompleted)
+            {
+                lbTrainError.Text = lbTestError.Text = lbCurrentIter.Text = String.Empty;
+            }
+
+            btnWriteResult.Enabled = isLearningCompleted;
+            btnLearn.Enabled = true;
+        }
+
+        private void WorkerOnProgressChanged(object sender, ProgressChangedEventArgs progressChangedEventArgs)
+        {
+            List<double> pars = progressChangedEventArgs.UserState as List<double>;
+
+            lbTestError.Text = String.Format("Ошибка на тестовой выборке: {0}", pars[1]);
+            lbTrainError.Text = String.Format("Ошибка на обучающей выборке: {0}", pars[0]);
+            lbCurrentIter.Text = String.Format("Итерация {0} из {1}", pars[2], pars[3]);
+        }
+
+        private void btnWriteResult_Click(object sender, EventArgs e)
+        {
+            neuroNet.write_result(new BackPropagationLearner().Name);
         }
     }
 }
