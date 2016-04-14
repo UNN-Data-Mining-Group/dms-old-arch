@@ -23,6 +23,7 @@ namespace DesisionTrees
         private DataContainer<List<string[]>> desTreeInfo;
         private DataContainer<DataContainer<List<string>>> learningInfo;
         private List<Parametr> arrParams;
+        public String newTreeName;
 
         public int node_id_in_table;  //for save tree into DB
 
@@ -36,8 +37,7 @@ namespace DesisionTrees
             tvTaskSelections.Nodes.Clear();
 
             dgwTrees.Rows.Clear();
-            dgwLA.Rows.Clear();
-
+           
             List<Tuple<int, string, int>> ls = dbHandler.SelectAllTasks();
             foreach (Tuple<int, string, int> item in ls)
             {
@@ -78,12 +78,10 @@ namespace DesisionTrees
             lbTaskSelected.Text = "Не выбрана";
             lbSelSelected.Text = "Не выбрана";
             lbTreeSelected.Text = "Не выбрано";
-            lbLASelected.Text = "Не выбран";
 
             isDesTreeSelected = false;
             isSelectionSelected = false;
 
-            btnLearn.Enabled = false;
             btnUse.Enabled = false;
         }
 
@@ -123,23 +121,33 @@ namespace DesisionTrees
         //        }
         //    }
 
-        //    dgwLA.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
         //    dgwLA.AutoResizeColumns();
         //}
         
         private void FillDesTreeUsingTable()
         {
+            dgwTrees.ColumnHeadersDefaultCellStyle.Font = new Font("Book Antiqua", 9);
             dgwTrees.Rows.Clear();
             List<Tree> tree_list = sqlManager.GetTreeWithRequest("SELECT * FROM TREE WHERE TASK_ID = (SELECT TASK_ID FROM SELECTION WHERE NAME =  '" + tvTaskSelections.SelectedNode.Text + "')");        
             dgwTrees.Columns.Clear();
-            dgwTrees.Columns.Add("ID", "ID");
-            dgwTrees.Columns.Add("TASK_ID", "TASK_ID");
-            dgwTrees.Columns.Add("SELECTION_ID", "SELECTION_ID");
-            dgwTrees.Columns.Add("ROOT_ID", "ROOT_ID");
+
+            
+            dgwTrees.Columns.Add("TREE_NAME", "Имя дерева");
+            dgwTrees.Columns.Add("TASK_NAME", "Задача");
+            dgwTrees.Columns.Add("SELECTION_NAME", "Выборка");
+            for (int i = 0; i < dgwTrees.Columns.Count; i++)
+            {
+                DataGridViewColumn column = dgwTrees.Columns[i];
+                column.Width = dgwTrees.Size.Width / 3 - 17;
+            }
             
             foreach(Tree tree in tree_list)
             {
-                dgwTrees.Rows.Add(tree.Row());                
+                string[] Row = new string[3];
+                Row[0] = tree.TREE_NAME;
+                Row[1] = sqlManager.GetTasksWithRequest("SELECT * FROM TASK WHERE ID = " + tree.TASK_ID)[0].Name;
+                Row[2] = sqlManager.GetOneSelectionWithRequest("SELECT * FROM SELECTION WHERE ID =" + tree.SELECTION_ID).Name;
+                dgwTrees.Rows.Add(Row);                
             }
 
         }
@@ -167,12 +175,9 @@ namespace DesisionTrees
                 lbSelSelected.Text = "Не выбрана";
                 isSelectionSelected = false;
 
-                dgwLA.Rows.Clear();
 
                 FillDesTreeUsingTable();
                 btnUse.Enabled = false;
-                btnLearn.Enabled = false;
-                lbLASelected.Text = "Не выбран";
             }
             else
             {
@@ -190,16 +195,11 @@ namespace DesisionTrees
                 {
                     //FillLearningAlgorithmsTable(lbTreeSelected.Text, lbSelSelected.Text);
                     btnUse.Enabled = false;
-                    btnLearn.Enabled = false;
-                    lbLASelected.Text = "Не выбран";
                 }
                 else
                 {
-                    dgwLA.Rows.Clear();
                     btnUse.Enabled = false;
-                    btnLearn.Enabled = false;
                     FillDesTreeUsingTable();
-                    lbLASelected.Text = "Не выбран";
                 }
             }
         }
@@ -513,14 +513,14 @@ namespace DesisionTrees
         }
 
 
-        private void SaveTreeToDB(TreeNode root, int root_id, int cur_task_id, int cur_selection_id)
+        private void SaveTreeToDB(TreeNode root, String tree_name, int root_id, int cur_task_id, int cur_selection_id)
         {
             node_id_in_table = root_id;
             SaveNodeToDB(root, root_id);
 
 
-            String sqlReqStr = "INSERT INTO TREE (TASK_ID, SELECTION_ID, ROOT_ID) " +
-                "VALUES('" + cur_task_id + "','" + cur_selection_id + "','" + root_id + "');";
+            String sqlReqStr = "INSERT INTO TREE (TREE_NAME, TASK_ID, SELECTION_ID, ROOT_ID) " +
+                "VALUES('" + tree_name + "','" + cur_task_id + "','" + cur_selection_id + "','" + root_id + "');";
             int state = sqlManager.SendInsertRequest(sqlReqStr);
             if (state == 0)
                 Console.WriteLine("error");
@@ -531,6 +531,12 @@ namespace DesisionTrees
 
         private void btnBuildTree_Click(object sender, EventArgs e)
         {
+            
+            TreeNameInputForm treeNameForm = new TreeNameInputForm();
+            treeNameForm.Owner = this;
+            treeNameForm.ShowDialog();
+            //treeNameForm.
+
             Selection selection = sqlManager.GetOneSelectionWithRequest("SELECT * FROM SELECTION WHERE NAME ='"+tvTaskSelections.SelectedNode.Text+"'");
             arrParams = sqlManager.GetParamsWithRequest("SELECT * FROM PARAM WHERE TASK_ID = (SELECT TASK_ID FROM SELECTION WHERE NAME =  '" + tvTaskSelections.SelectedNode.Text + "')");
             List<ValueParametr> arrValues = sqlManager.GetValuesWithRequest("select * from VALUE_PARAM where SELECTION_ID=(select ID from SELECTION where NAME ='" + tvTaskSelections.SelectedNode.Text + "')");
@@ -539,16 +545,19 @@ namespace DesisionTrees
             int root_id = 1 + sqlManager.GetMaxFeature("SELECT COUNT(1) FROM NODE","COUNT(1)");
             treeBuilding(educatTable, root);
 
-            SaveTreeToDB(root, root_id, selection.TaskID, selection.ID);      
+            SaveTreeToDB(root, newTreeName, root_id, selection.TaskID, selection.ID);
+
+            FillDesTreeUsingTable();
         }
 
         private void dgwTrees_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if ((e.RowIndex != -1) && (e.ColumnIndex == -1))
             {
-                lbTreeSelected.Text = dgwTrees.Rows[e.RowIndex].Cells["ID"].Value.ToString();
+                lbTreeSelected.Text = dgwTrees.Rows[e.RowIndex].Cells["TREE_NAME"].Value.ToString();
                 btnUse.Enabled = true;
-                usedTreeRootID = Convert.ToInt32(dgwTrees.Rows[e.RowIndex].Cells["ROOT_ID"].Value);
+                usedTreeRootID = sqlManager.GetTreeWithRequest("SELECT * FROM TREE WHERE TREE_NAME = '" + lbTreeSelected.Text + "'")[0].ROOT_ID;
+                //usedTreeRootID = Convert.ToInt32(dgwTrees.Rows[e.RowIndex].Cells["ROOT_ID"].Value);
             }
         }
 
@@ -558,11 +567,5 @@ namespace DesisionTrees
             TreeUsingForm treeUsingFrm = new TreeUsingForm(arrParams,usedTreeRootID);
             treeUsingFrm.Show();
         }
-
-        private void btnLearn_Click(object sender, EventArgs e)
-        {
-
-        }
-
     }
 }

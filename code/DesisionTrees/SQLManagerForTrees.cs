@@ -245,6 +245,7 @@ namespace DesisionTrees
                 {
                     tree = new Tree();
                     tree.ID = int.Parse(string.Format("{0}", r["ID"]));
+                    tree.TREE_NAME = r["TREE_NAME"].ToString();
                     tree.TASK_ID = int.Parse(string.Format("{0}", r["TASK_ID"]));
                     tree.SELECTION_ID = int.Parse(string.Format("{0}", r["SELECTION_ID"]));
                     tree.ROOT_ID = int.Parse(string.Format("{0}", r["ROOT_ID"]));

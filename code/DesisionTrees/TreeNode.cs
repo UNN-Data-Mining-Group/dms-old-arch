@@ -60,18 +60,29 @@ namespace DesisionTrees
     public class Tree
     {
         public int ID;
+        public String TREE_NAME;
         public int TASK_ID;
         public int SELECTION_ID;
         public int ROOT_ID;
         
-        public string[] Row()
+        //public string[] Row()
+        //{
+        //    string[] res = new string[5];
+        //    res[0] = ID.ToString();
+        //    res[1] = TREE_NAME.ToString();
+        //    res[2] = TASK_ID.ToString();
+        //    res[3] = SELECTION_ID.ToString();
+        //    res[4] = ROOT_ID.ToString();
+        //    return res;
+        //}
+
+        public Tree()
         {
-            string[] res = new string[4];
-            res[0] = ID.ToString();
-            res[1] = TASK_ID.ToString();
-            res[2] = SELECTION_ID.ToString();
-            res[3] = ROOT_ID.ToString();
-            return res;
+            ID = 0;
+            TREE_NAME = System.String.Empty;
+            TASK_ID = 0;
+            SELECTION_ID = 0;
+            ROOT_ID = 0;
         }
     }
 
