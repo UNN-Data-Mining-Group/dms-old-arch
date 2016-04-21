@@ -11,6 +11,7 @@ using NeuroWnd.Neuro_Nets;
 using NeuroWnd.Activate_functions;
 using System.Reflection;
 using LearningAlgorithms;
+using NeuroWnd.Parameter;
 
 namespace NeuroWnd
 {
@@ -25,6 +26,8 @@ namespace NeuroWnd
 
         private void LoadInformationForUsingNeuroNets()
         {
+            cbInt.SelectedIndex = cbEnum.SelectedIndex = cbReal.SelectedIndex = 0;
+
             neuroNetsInfo.Clear();
             learningInfo.Clear();
             tvTaskSelections.Nodes.Clear();
@@ -466,20 +469,72 @@ namespace NeuroWnd
             NeuroNetLearningInterface Inn = new NeuroNetLearningInterface(net, lbNetSelected.Text,
                 lbSelSelected.Text, dbHandler);
 
-            double[,] selection = dbHandler.SelectLearningSelection(lbSelSelected.Text);
+            string[,] selection = dbHandler.SelectLearningSelection(lbSelSelected.Text);
+            List<string> types = dbHandler.GetParameterTypesOfSelection(lbTaskSelected.Text);
 
-
+            double[,] convertedSelection = new double[selection.GetLength(0), selection.GetLength(1)];
+            for (int par = 0; par < types.Count; par++)
+            {
+                if (types[par].Equals("Int"))
+                {
+                    List<string> v = new List<string>();
+                    for (int i = 0; i < selection.GetLength(0); i++)
+                        v.Add(selection[i, par]);
+                    IntegerParameter ip = new IntegerParameter(v);
+                    for (int i = 0; i < selection.GetLength(0); i++)
+                    {
+                        if (cbInt.SelectedIndex == 0)
+                            convertedSelection[i, par] = Convert.ToDouble(ip.GetInt(selection[i, par]));
+                        else if (cbInt.SelectedIndex == 1)
+                            convertedSelection[i, par] = Convert.ToDouble(ip.GetNormalizedInt(selection[i, par]));
+                        else if (cbInt.SelectedIndex == 2)
+                            convertedSelection[i, par] = Convert.ToDouble(ip.GetNormalizedDouble(selection[i, par]));
+                    }
+                }
+                else if (types[par].Equals("Real"))
+                {
+                    List<string> v = new List<string>();
+                    for (int i = 0; i < selection.GetLength(0); i++)
+                        v.Add(selection[i, par]);
+                    RealParameter ip = new RealParameter(v);
+                    for (int i = 0; i < selection.GetLength(0); i++)
+                    {
+                        if (cbReal.SelectedIndex == 0)
+                            convertedSelection[i, par] = Convert.ToDouble(ip.GetDouble(selection[i, par]));
+                        else if (cbReal.SelectedIndex == 1)
+                            convertedSelection[i, par] = Convert.ToDouble(ip.GetNormalizedInt(selection[i, par]));
+                        else if (cbReal.SelectedIndex == 2)
+                            convertedSelection[i, par] = Convert.ToDouble(ip.GetNormalizedDouble(selection[i, par]));
+                    }
+                }
+                else if ((types[par].Equals("Enum")))
+                {
+                    List<string> v = new List<string>();
+                    for (int i = 0; i < selection.GetLength(0); i++)
+                        v.Add(selection[i, par]);
+                    EnumeratedParameter ip = new EnumeratedParameter(v);
+                    for (int i = 0; i < selection.GetLength(0); i++)
+                    {
+                        if (cbEnum.SelectedIndex == 0)
+                            convertedSelection[i, par] = Convert.ToDouble(ip.GetInt(selection[i, par]));
+                        else if (cbEnum.SelectedIndex == 1)
+                            convertedSelection[i, par] = Convert.ToDouble(ip.GetNormalizedInt(selection[i, par]));
+                        else if (cbEnum.SelectedIndex == 2)
+                            convertedSelection[i, par] = Convert.ToDouble(ip.GetNormalizedDouble(selection[i, par]));
+                    }
+                }
+            }
             if (lbLASelected.Text.Equals("Генетический алгоритм"))
             {
-                GeneticAlgorithmForm fm = new GeneticAlgorithmForm(Inn, selection);
+                GeneticAlgorithmForm fm = new GeneticAlgorithmForm(Inn, convertedSelection);
                 fm.ShowDialog();
             }
             else if (lbLASelected.Text.Equals("Алгоритм обратного распространения ошибки"))
             {
-                BackPropagationAlgorithmForm fm = new BackPropagationAlgorithmForm(Inn, selection);
+                BackPropagationAlgorithmForm fm = new BackPropagationAlgorithmForm(Inn, convertedSelection);
                 fm.ShowDialog();
             }
-
+            
             LoadInformationForUsingNeuroNets();
         }
 

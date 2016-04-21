@@ -20,7 +20,48 @@ namespace NeuroWnd
             connector = new SQLiteConnector();
         }
 
-        public double[,] SelectLearningSelection(String SelectionName)
+        public List<string> GetParameterTypesOfSelection(String TaskName)
+        {
+            List<string> res = new List<string>();
+            connector.ConnectToDB();
+            SQLiteCommand cmd = new SQLiteCommand(connector.connection);
+            cmd.CommandText = "SELECT ID FROM TASK WHERE NAME='" + TaskName + "'";
+            int selID = Convert.ToInt32(cmd.ExecuteScalar());
+
+            cmd.CommandText = "SELECT TYPE FROM PARAM WHERE TASK_ID=" + selID;
+            SQLiteDataReader reader = cmd.ExecuteReader();
+            try
+            {
+                while (reader.Read())
+                {
+                    int val = Convert.ToInt32(reader[0]);
+                    if (val == 0)
+                        res.Add("Int");
+                    else if (val == 1)
+                        res.Add("Real");
+                    else if(val == 2 || val == 3)
+                        res.Add("Enum");
+                }
+            }
+            catch (SQLiteException ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+            reader.Close();
+            connector.DisconnectFromDB();
+
+            string outType = res[0];
+            for (int i = 1; i < res.Count; i++)
+            {
+                res[i - 1] = res[i];
+            }
+            res[res.Count - 1] = outType;
+
+            return res;
+        }
+
+        public string[,] SelectLearningSelection(String SelectionName)
         {
             connector.ConnectToDB();
             SQLiteCommand cmd = new SQLiteCommand(connector.connection);
@@ -31,7 +72,7 @@ namespace NeuroWnd
             SQLManager sqlManager = new SQLManager();
             List<ValueParametr> arrValues = sqlManager.GetValuesWithRequest(
                 String.Format("select * from VALUE_PARAM where SELECTION_ID = '{0}';", selID));
-
+            
             int prevIndex = arrValues[0].RowIndex;
             int countParams = 1;
             while (countParams < arrValues.Count)
@@ -43,7 +84,7 @@ namespace NeuroWnd
                 countParams++;
             }
 
-            double[,] sel = new double[arrValues.Count / countParams, countParams];
+            string[,] sel = new string[arrValues.Count / countParams, countParams];
 
             int row = 0;
             int param = 0;
@@ -58,11 +99,11 @@ namespace NeuroWnd
 
                 if (param == 0)
                 {
-                    sel[row, countParams - 1] = Convert.ToDouble(valueParam.Value);
+                    sel[row, countParams - 1] = valueParam.Value;
                 }
                 else
                 {
-                    sel[row, param - 1] = Convert.ToDouble(valueParam.Value);
+                    sel[row, param - 1] = valueParam.Value;
                 }
                 param++;
                 prevIndex = valueParam.RowIndex;
