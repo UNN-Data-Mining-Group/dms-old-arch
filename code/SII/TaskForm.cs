@@ -410,7 +410,7 @@ namespace SII
                     addedSelectionEndBtn.Enabled = false;
                     Selection curSelection = arrSelections.Last();
                     curSelection.WithRes = true;//test
-                    curSelection.LoadArrValueParametersFromFile(openValuesFile.FileName, arrParams);
+                    ProgressBarDialog dialog = new ProgressBarDialog(curSelection, openValuesFile.FileName, arrParams);
                     row = selectionsDataGridView.Rows[selectionsDataGridView.RowCount - 1];
                     row.Cells[1].Value = curSelection.CountRows;
                     UpdateSelection(curSelection);

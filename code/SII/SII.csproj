@@ -60,6 +60,12 @@
   <ItemGroup>
     <Compile Include="InfoLocation.cs" />
     <Compile Include="Parametr.cs" />
+    <Compile Include="ProgressBarDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ProgressBarDialog.Designer.cs">
+      <DependentUpon>ProgressBarDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Selection.cs" />
     <Compile Include="SelectionForm.cs">
       <SubType>Form</SubType>
@@ -84,6 +90,9 @@
     <Compile Include="SQLManager.cs" />
     <Compile Include="Task.cs" />
     <Compile Include="ValueParametr.cs" />
+    <EmbeddedResource Include="ProgressBarDialog.resx">
+      <DependentUpon>ProgressBarDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="SelectionForm.resx">
       <DependentUpon>SelectionForm.cs</DependentUpon>
     </EmbeddedResource>
