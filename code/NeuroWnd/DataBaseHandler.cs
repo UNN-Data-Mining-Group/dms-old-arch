@@ -26,9 +26,9 @@ namespace NeuroWnd
             connector.ConnectToDB();
             SQLiteCommand cmd = new SQLiteCommand(connector.connection);
             cmd.CommandText = "SELECT ID FROM TASK WHERE NAME='" + TaskName + "'";
-            int selID = Convert.ToInt32(cmd.ExecuteScalar());
+            int taskID = Convert.ToInt32(cmd.ExecuteScalar());
 
-            cmd.CommandText = "SELECT TYPE FROM PARAM WHERE TASK_ID=" + selID;
+            cmd.CommandText = "SELECT TYPE FROM PARAM WHERE TASK_ID=" + taskID;
             SQLiteDataReader reader = cmd.ExecuteReader();
             try
             {
@@ -61,11 +61,15 @@ namespace NeuroWnd
             return res;
         }
 
-        public string[,] SelectLearningSelection(String SelectionName)
+        public string[,] SelectLearningSelection(String TaskName, String SelectionName)
         {
             connector.ConnectToDB();
             SQLiteCommand cmd = new SQLiteCommand(connector.connection);
-            cmd.CommandText = "SELECT ID FROM SELECTION WHERE NAME='" + SelectionName + "'";
+
+            cmd.CommandText = "SELECT ID FROM TASK WHERE NAME='" + TaskName + "'";
+            int taskID = Convert.ToInt32(cmd.ExecuteScalar());
+
+            cmd.CommandText = "SELECT ID FROM SELECTION WHERE NAME='" + SelectionName + "'AND TASK_ID=" + taskID;
             int selID = Convert.ToInt32(cmd.ExecuteScalar());
             connector.DisconnectFromDB();
 

@@ -50,6 +50,10 @@
     </Compile>
     <Compile Include="BackPropagationLearner.cs" />
     <Compile Include="DataSet.cs" />
+    <Compile Include="Parameter\EnumeratedParameter.cs" />
+    <Compile Include="Parameter\IntegerParameter.cs" />
+    <Compile Include="Parameter\IParameter.cs" />
+    <Compile Include="Parameter\RealParameter.cs" />
     <Compile Include="Progres.cs">
       <SubType>Form</SubType>
     </Compile>
