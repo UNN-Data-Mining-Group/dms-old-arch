@@ -8,10 +8,11 @@ namespace SII
 {
     public class SQLManager
     {
-        private const string PATH_DB = "SII.db";
+        private const string PATH_DB = "../../../DataBase/SII.db";
 
         private SQLiteConnection conn;
         private SQLiteTransaction trans;
+        private SQLiteCommand currentCmdInsert;
 
         private static SQLManager mainSQLManager;
 
@@ -210,6 +211,46 @@ namespace SII
                 return 0;
             }            
             //conn.Close();
+            return key;
+        }
+
+        public int SendInsertRequestWithTransaction(String req)
+        {
+            if (currentCmdInsert == null)
+                currentCmdInsert = new SQLiteCommand(conn);
+            currentCmdInsert.CommandText = req;
+            currentCmdInsert.Transaction = trans;
+            int key = 1;
+            try
+            {
+                currentCmdInsert.ExecuteNonQuery();
+            }
+            catch (SQLiteException ex)
+            {
+                Console.WriteLine(ex.Message);
+                trans.Rollback();
+                trans = null;
+                return 0;
+            }
+            return key;
+        }
+
+        public int LastId()
+        {
+            //conn.Open();
+            SQLiteCommand cmd = new SQLiteCommand(conn);
+            string sql = @"select last_insert_rowid()";
+            cmd.CommandText = sql;
+            int key = -1;
+            try
+            {
+                key = (int)(long)cmd.ExecuteScalar();
+            }
+            catch (SQLiteException ex)
+            {
+                Console.WriteLine(ex.Message);
+                return 0;
+            }
             return key;
         }
 
