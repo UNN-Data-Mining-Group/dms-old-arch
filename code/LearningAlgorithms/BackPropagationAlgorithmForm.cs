@@ -6,19 +6,30 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using NeuroWnd.Parameter;
 
 namespace LearningAlgorithms
 {
+    public enum OutputAttributeMode
+    {
+        AsItIs,
+        IntNormalised,
+        DoubleNormalised
+    };
     public partial class BackPropagationAlgorithmForm : Form
     {
         private INeuroNetLearning neuroNet;
         private DataSet dataSet;
         private bool isLearningCompleted = false;
         private bool isPercentError;
+        private IParameter outParameter;
+        private OutputAttributeMode mode;
 
-        public BackPropagationAlgorithmForm(INeuroNetLearning solver, double[,] trainingSet)
+        public BackPropagationAlgorithmForm(INeuroNetLearning solver, double[,] trainingSet, IParameter outPar, OutputAttributeMode outMode)
         {
             neuroNet = solver;
+            outParameter = outPar;
+            mode = outMode;
 
             dataSet = new DataSet();
             for (int i = 0; i < trainingSet.GetLength(0); i++)
@@ -100,7 +111,77 @@ namespace LearningAlgorithms
                         double y = neuroNet.get_res(train.GetX(i));
 
                         if (isPercentError)
-                            trainError += Convert.ToDouble(Convert.ToInt32(y) != Convert.ToInt32(train.GetY(i)));
+                        {
+                            if (outParameter.Type.Equals("Real"))
+                            {
+                                RealParameter p = outParameter as RealParameter;
+                                double solvedY = 0.0;
+                                double rightY = 0.0;
+                                if (mode == OutputAttributeMode.AsItIs)
+                                {
+                                    solvedY = y;
+                                    rightY = train.GetY(i);
+                                }
+                                else if (mode == OutputAttributeMode.DoubleNormalised)
+                                {
+                                    solvedY = Convert.ToDouble(p.GetFromNormalized(y));
+                                    rightY = Convert.ToDouble(p.GetFromNormalized(train.GetY(i)));
+                                }
+                                else if (mode == OutputAttributeMode.IntNormalised)
+                                {
+                                    solvedY = Convert.ToDouble(p.GetFromNormalized(Convert.ToInt32(y)));
+                                    rightY = Convert.ToDouble(p.GetFromNormalized(Convert.ToInt32(train.GetY(i))));
+                                }
+                                if (Math.Abs(solvedY - rightY) >= Math.Pow(10, -p.CountNumbers)/2)
+                                    trainError += 1;
+                            }
+                            else if (outParameter.Type.Equals("Integer"))
+                            {
+                                IntegerParameter p = outParameter as IntegerParameter;
+                                int solvedY = 0;
+                                int rightY = 0;
+                                if (mode == OutputAttributeMode.AsItIs)
+                                {
+                                    solvedY = Convert.ToInt32(y);
+                                    rightY = Convert.ToInt32(train.GetY(i));
+                                }
+                                else if (mode == OutputAttributeMode.DoubleNormalised)
+                                {
+                                    solvedY = Convert.ToInt32(p.GetFromNormalized(y));
+                                    rightY = Convert.ToInt32(p.GetFromNormalized(train.GetY(i)));
+                                }
+                                else if (mode == OutputAttributeMode.IntNormalised)
+                                {
+                                    solvedY = Convert.ToInt32(p.GetFromNormalized(Convert.ToInt32(y)));
+                                    rightY = Convert.ToInt32(p.GetFromNormalized(Convert.ToInt32(train.GetY(i))));
+                                }
+                                if (Math.Abs(solvedY - rightY) > 2)
+                                    trainError += 1;
+                            }
+                            else if (outParameter.Type.Equals("Enum"))
+                            {
+                                EnumeratedParameter p = outParameter as EnumeratedParameter;
+                                string solvedY = "";
+                                string rightY = "";
+                                if (mode == OutputAttributeMode.AsItIs)
+                                {
+                                    solvedY = p.Get(Convert.ToInt32(y));
+                                    rightY = p.Get(Convert.ToInt32(train.GetY(i)));
+                                }
+                                else if (mode == OutputAttributeMode.DoubleNormalised)
+                                {
+                                    solvedY = p.GetFromNormalized(y);
+                                    rightY = p.GetFromNormalized(train.GetY(i));
+                                }
+                                else if (mode == OutputAttributeMode.IntNormalised)
+                                {
+                                    solvedY = p.GetFromNormalized(Convert.ToInt32(y));
+                                    rightY = p.GetFromNormalized(Convert.ToInt32(train.GetY(i)));
+                                }
+                                if (!solvedY.Equals(rightY))
+                                    trainError += 1;
+                            }
+                        }
                         else
                             trainError += Math.Pow(y - train.GetY(i), 2.0);
                     }
@@ -111,7 +192,77 @@ namespace LearningAlgorithms
                         double y = neuroNet.get_res(test.GetX(i));
 
                         if (isPercentError)
-                            testError += Convert.ToDouble(Convert.ToInt32(y) != Convert.ToInt32(test.GetY(i)));
+                        {
+                            if (outParameter.Type.Equals("Real"))
+                            {
+                                RealParameter p = outParameter as RealParameter;
+                                double solvedY = 0.0;
+                                double rightY = 0.0;
+                                if (mode == OutputAttributeMode.AsItIs)
+                                {
+                                    solvedY = y;
+                                    rightY = test.GetY(i);
+                                }
+                                else if (mode == OutputAttributeMode.DoubleNormalised)
+                                {
+                                    solvedY = Convert.ToDouble(p.GetFromNormalized(y));
+                                    rightY = Convert.ToDouble(p.GetFromNormalized(test.GetY(i)));
+                                }
+                                else if (mode == OutputAttributeMode.IntNormalised)
+                                {
+                                    solvedY = Convert.ToDouble(p.GetFromNormalized(Convert.ToInt32(y)));
+                                    rightY = Convert.ToDouble(p.GetFromNormalized(Convert.ToInt32(test.GetY(i))));
+                                }
+                                if (Math.Abs(solvedY - rightY) >= Math.Pow(10, -p.CountNumbers)/2)
+                                    testError += 1;
+                            }
+                            else if (outParameter.Type.Equals("Integer"))
+                            {
+                                IntegerParameter p = outParameter as IntegerParameter;
+                                int solvedY = 0;
+                                int rightY = 0;
+                                if (mode == OutputAttributeMode.AsItIs)
+                                {
+                                    solvedY = Convert.ToInt32(y);
+                                    rightY = Convert.ToInt32(test.GetY(i));
+                                }
+                                else if (mode == OutputAttributeMode.DoubleNormalised)
+                                {
+                                    solvedY = Convert.ToInt32(p.GetFromNormalized(y));
+                                    rightY = Convert.ToInt32(p.GetFromNormalized(test.GetY(i)));
+                                }
+                                else if (mode == OutputAttributeMode.IntNormalised)
+                                {
+                                    solvedY = Convert.ToInt32(p.GetFromNormalized(Convert.ToInt32(y)));
+                                    rightY = Convert.ToInt32(p.GetFromNormalized(Convert.ToInt32(test.GetY(i))));
+                                }
+                                if (Math.Abs(solvedY - rightY) > 2)
+                                    testError += 1;
+                            }
+                            else if (outParameter.Type.Equals("Enum"))
+                            {
+                                EnumeratedParameter p = outParameter as EnumeratedParameter;
+                                string solvedY = "";
+                                string rightY = "";
+                                if (mode == OutputAttributeMode.AsItIs)
+                                {
+                                    solvedY = p.Get(Convert.ToInt32(y));
+                                    rightY = p.Get(Convert.ToInt32(test.GetY(i)));
+                                }
+                                else if (mode == OutputAttributeMode.DoubleNormalised)
+                                {
+                                    solvedY = p.GetFromNormalized(y);
+                                    rightY = p.GetFromNormalized(test.GetY(i));
+                                }
+                                else if (mode == OutputAttributeMode.IntNormalised)
+                                {
+                                    solvedY = p.GetFromNormalized(Convert.ToInt32(y));
+                                    rightY = p.GetFromNormalized(Convert.ToInt32(test.GetY(i)));
+                                }
+                                if (!solvedY.Equals(rightY))
+                                    testError += 1;
+                            }
+                        }
                         else
                             testError += Math.Pow(y - test.GetY(i), 2.0);
                     }

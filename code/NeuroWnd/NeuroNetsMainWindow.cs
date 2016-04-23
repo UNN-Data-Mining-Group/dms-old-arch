@@ -469,9 +469,10 @@ namespace NeuroWnd
             NeuroNetLearningInterface Inn = new NeuroNetLearningInterface(net, lbNetSelected.Text,
                 lbSelSelected.Text, dbHandler);
 
-            string[,] selection = dbHandler.SelectLearningSelection(lbSelSelected.Text);
+            string[,] selection = dbHandler.SelectLearningSelection(lbTaskSelected.Text, lbSelSelected.Text);
             List<string> types = dbHandler.GetParameterTypesOfSelection(lbTaskSelected.Text);
 
+            IParameter outParameter = null;
             double[,] convertedSelection = new double[selection.GetLength(0), selection.GetLength(1)];
             for (int par = 0; par < types.Count; par++)
             {
@@ -481,6 +482,9 @@ namespace NeuroWnd
                     for (int i = 0; i < selection.GetLength(0); i++)
                         v.Add(selection[i, par]);
                     IntegerParameter ip = new IntegerParameter(v);
+                    if (par == types.Count - 1)
+                        outParameter = ip;
+
                     for (int i = 0; i < selection.GetLength(0); i++)
                     {
                         if (cbInt.SelectedIndex == 0)
@@ -497,6 +501,9 @@ namespace NeuroWnd
                     for (int i = 0; i < selection.GetLength(0); i++)
                         v.Add(selection[i, par]);
                     RealParameter ip = new RealParameter(v);
+                    if (par == types.Count - 1)
+                        outParameter = ip;
+
                     for (int i = 0; i < selection.GetLength(0); i++)
                     {
                         if (cbReal.SelectedIndex == 0)
@@ -513,6 +520,9 @@ namespace NeuroWnd
                     for (int i = 0; i < selection.GetLength(0); i++)
                         v.Add(selection[i, par]);
                     EnumeratedParameter ip = new EnumeratedParameter(v);
+                    if (par == types.Count - 1)
+                        outParameter = ip;
+
                     for (int i = 0; i < selection.GetLength(0); i++)
                     {
                         if (cbEnum.SelectedIndex == 0)
@@ -531,7 +541,21 @@ namespace NeuroWnd
             }
             else if (lbLASelected.Text.Equals("Алгоритм обратного распространения ошибки"))
             {
-                BackPropagationAlgorithmForm fm = new BackPropagationAlgorithmForm(Inn, convertedSelection);
+                OutputAttributeMode mode = 0;
+                if (types[types.Count - 1] == "Real")
+                {
+                    mode = (OutputAttributeMode)cbReal.SelectedIndex;
+                }
+                else if (types[types.Count - 1] == "Int")
+                {
+                    mode = (OutputAttributeMode)cbInt.SelectedIndex;
+                }
+                else if (types[types.Count - 1] == "Enum")
+                {
+                    mode = (OutputAttributeMode)cbEnum.SelectedIndex;
+                }
+
+                BackPropagationAlgorithmForm fm = new BackPropagationAlgorithmForm(Inn, convertedSelection, outParameter, mode);
                 fm.ShowDialog();
             }
             
