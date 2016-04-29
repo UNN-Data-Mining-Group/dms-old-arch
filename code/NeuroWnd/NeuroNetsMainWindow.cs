@@ -11,6 +11,7 @@ using NeuroWnd.Neuro_Nets;
 using NeuroWnd.Activate_functions;
 using System.Reflection;
 using LearningAlgorithms;
+using LearningAlgorithms.Parameter;
 using NeuroWnd.Parameter;
 
 namespace NeuroWnd
@@ -541,21 +542,60 @@ namespace NeuroWnd
             }
             else if (lbLASelected.Text.Equals("Алгоритм обратного распространения ошибки"))
             {
-                OutputAttributeMode mode = 0;
+                IParameterValueComparer comparer = null;
                 if (types[types.Count - 1] == "Real")
                 {
-                    mode = (OutputAttributeMode)cbReal.SelectedIndex;
+                    ParameterValueType type = ParameterValueType.String;
+                    switch (cbReal.SelectedIndex)
+                    {
+                        case 0:
+                            type = ParameterValueType.Real;
+                            break;
+                        case 1:
+                            type = ParameterValueType.NormalisedInteger;
+                            break;
+                        case 2:
+                            type = ParameterValueType.NormalisedReal;
+                            break;
+                    }
+                    comparer = new RealValueComparer((RealParameter)outParameter, type, type);
                 }
                 else if (types[types.Count - 1] == "Int")
                 {
-                    mode = (OutputAttributeMode)cbInt.SelectedIndex;
+                    ParameterValueType type = ParameterValueType.String;
+                    switch (cbInt.SelectedIndex)
+                    {
+                        case 0:
+                            type = ParameterValueType.Integer;
+                            break;
+                        case 1:
+                            type = ParameterValueType.NormalisedInteger;
+                            break;
+                        case 2:
+                            type = ParameterValueType.NormalisedReal;
+                            break;
+                    }
+                    comparer = new IntegerValueComparer((IntegerParameter)outParameter, type, type);
                 }
                 else if (types[types.Count - 1] == "Enum")
                 {
-                    mode = (OutputAttributeMode)cbEnum.SelectedIndex;
+                    ParameterValueType type = ParameterValueType.String;
+                    switch (cbEnum.SelectedIndex)
+                    {
+                        case 0:
+                            type = ParameterValueType.Integer;
+                            break;
+                        case 1:
+                            type = ParameterValueType.NormalisedInteger;
+                            break;
+                        case 2:
+                            type = ParameterValueType.NormalisedReal;
+                            break;
+                    }
+                    comparer = new EnumeratedValueComparer((EnumeratedParameter)outParameter, type, type);
                 }
 
-                BackPropagationAlgorithmForm fm = new BackPropagationAlgorithmForm(Inn, convertedSelection, outParameter, mode);
+                BackPropagationAlgorithmForm fm = new BackPropagationAlgorithmForm(Inn, convertedSelection, comparer);
                 fm.ShowDialog();
             }
             

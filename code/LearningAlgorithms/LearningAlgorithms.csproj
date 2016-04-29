@@ -51,9 +51,13 @@
     <Compile Include="BackPropagationLearner.cs" />
     <Compile Include="DataSet.cs" />
     <Compile Include="Parameter\EnumeratedParameter.cs" />
+    <Compile Include="Parameter\EnumeratedValueComparer.cs" />
     <Compile Include="Parameter\IntegerParameter.cs" />
+    <Compile Include="Parameter\IntegerValueComparer.cs" />
     <Compile Include="Parameter\IParameter.cs" />
+    <Compile Include="Parameter\IParameterValueComparer.cs" />
     <Compile Include="Parameter\RealParameter.cs" />
+    <Compile Include="Parameter\RealValueComparer.cs" />
     <Compile Include="Progres.cs">
       <SubType>Form</SubType>
     </Compile>
