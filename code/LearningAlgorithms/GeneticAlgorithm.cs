@@ -21,6 +21,7 @@ namespace LearningAlgorithms
         }
         bool is_rep_2;
         double min_err;
+        const int count_gen_in_hromosom = 8;
         person[] population;
         struct person
         {
@@ -73,6 +74,7 @@ namespace LearningAlgorithms
         private double[,] long_to_doubl(int num_person)
         {
             int num_hromosom = 0;
+            const int max_weight = 1 << count_gen_in_hromosom;
             double[,] res = new double[topologi.GetLength(0), topologi.GetLength(1)];
             for (int i = 0; i < topologi.GetLength(0); i++)
             {
@@ -80,7 +82,7 @@ namespace LearningAlgorithms
                 {
                     if (topologi[i, j])
                     {
-                        res[i, j] = BitConverter.Int64BitsToDouble(population[num_person].population_weight[num_hromosom]);
+                        res[i, j] = population[num_person].population_weight[num_hromosom] / max_weight - 1 / 2;
                         num_hromosom++;
                     }
                     else
@@ -159,27 +161,8 @@ namespace LearningAlgorithms
                 }
             }
 
-            for (int i = 0; i < count_person; i++)
-            {
-                population[i].population_weight = new long[count_hromosom];
-                population[i].err = 0;
-                population[i].live_time = 0;
-                population[i].good_live = 0;
-                for (int j = 0; j < count_hromosom; j++)
-                {
-//                     long tmp = rand.Next();
-//                     tmp <<= 33;
-//                     tmp |= rand.Next();
-                    population[i].population_weight[j] = BitConverter.DoubleToInt64Bits(2*rand.NextDouble() - 1);
-                    while (System.Double.IsNaN(BitConverter.Int64BitsToDouble(population[i].population_weight[j])))
-                    {
-                        long mut = rand.Next();
-                        mut <<= 33;
-                        mut |= rand.Next();
-                        population[i].population_weight[j] ^= mut;
-                    }
-                }
-            }
+            set_default_weight(count_hromosom);
+            
             for (int i = 0; i < count_person; i++)
             {
                 population[i].pers.set_links(long_to_doubl(i));//задаём новые веса, полная матрица весов
@@ -293,6 +276,22 @@ namespace LearningAlgorithms
             
 
         }
+
+        private void set_default_weight(int count_hromosom)
+        {
+            const int max_weight = 1 << count_gen_in_hromosom;
+            for (int i = 0; i < count_person; i++)
+            {
+                population[i].population_weight = new long[count_hromosom];
+                population[i].err = 0;
+                population[i].live_time = 0;
+                population[i].good_live = 0;
+                for (int j = 0; j < count_hromosom; j++)
+                {
+                    population[i].population_weight[j] = rand.Next(0, max_weight);                   
+                }
+            }
+        }
        
         private bool is_not_stop()
         {
@@ -329,7 +328,7 @@ namespace LearningAlgorithms
             } 
             else
             {
-                Reproduction_2();
+                //Reproduction_2();
             }
            
             for (int i = 0; i < train; i++)
@@ -351,22 +350,20 @@ namespace LearningAlgorithms
         private void Reproduction()
         {
             long tmp, tmp_;
-            for (int i = 0; i < train; i += 2)
+            const int max_weight = 1 << count_gen_in_hromosom;
+            for (int i = 0; i < train - 1; i += 2)
             {
                 for (int j = 0; j < population[i].population_weight.Length; j++)
                 {
-                    tmp = rand.Next();
-                    tmp <<= 33;
-                    tmp |= rand.Next();
+                    tmp = rand.Next(0, max_weight);
                     tmp_ = tmp;
                     tmp = population[i].population_weight[j] & tmp_;
                     tmp |= (population[i + 1].population_weight[j] & (~tmp_));
                     population[population.Length - 1 - i].population_weight[j] = tmp;
                     if (rand.NextDouble() < coef_mutation)
                     {
-                        long mut = rand.Next();
-                        mut <<= 33;
-                        mut |= rand.Next();
+                        long mut = rand.Next(0, max_weight);
+                       
                         population[population.Length - 1 - i].population_weight[j] ^= mut;
                     }
                     tmp = population[i].population_weight[j] & (~tmp_);
@@ -374,40 +371,27 @@ namespace LearningAlgorithms
                     population[population.Length - 2 - i].population_weight[j] = tmp;
                     if (rand.NextDouble() < coef_mutation)
                     {
-                        long mut = rand.Next();
-                        mut <<= 33;
-                        mut |= rand.Next();
+                        long mut = rand.Next(0, max_weight);
+
                         population[population.Length - 2 - i].population_weight[j] ^= mut;
                     }
-                    while (System.Double.IsNaN(BitConverter.Int64BitsToDouble(population[population.Length - 1 - i].population_weight[j])))
-                    {
-                        long mut = rand.Next();
-                        mut <<= 33;
-                        mut |= rand.Next();
-                        population[population.Length - 1 - i].population_weight[j] ^= mut;
-                    }
-                    while (System.Double.IsNaN(BitConverter.Int64BitsToDouble(population[population.Length - 2 - i].population_weight[j])))
-                    {
-                        long mut = rand.Next();
-                        mut <<= 33;
-                        mut |= rand.Next();
-                        population[population.Length - 2 - i].population_weight[j] ^= mut;
-                    }
+                   
                 }
                 population[population.Length - 1 - i].pers.set_links(long_to_doubl(population.Length - 1 - i));
                 population[population.Length - 2 - i].pers.set_links(long_to_doubl(population.Length - 2 - i));
             }
         }
-        private void Reproduction_2()
+    /*    private void Reproduction_2()
         {
             double tmp, tmp_,r;
-            for (int i = 0; i < train; i += 2)
+            const int max_weight = 1 << count_gen_in_hromosom;
+            for (int i = 0; i < train - 1; i += 2)
             {
                 for (int j = 0; j < population[i].population_weight.Length; j++)
                 {
                     r = (2 * rand.NextDouble() - 1);
-                    tmp = BitConverter.Int64BitsToDouble(population[i].population_weight[j]);
-                    tmp_ = BitConverter.Int64BitsToDouble(population[i + 1].population_weight[j]); 
+                    tmp = population[i].population_weight[j] / max_weight - 1 / 2;
+                    tmp_ = population[i + 1].population_weight[j] / max_weight - 1 / 2;
                     population[population.Length - 1 - i].population_weight[j] =BitConverter.DoubleToInt64Bits(tmp
                         + r*(tmp - tmp_));
                     if (rand.NextDouble() < coef_mutation)
@@ -424,6 +408,6 @@ namespace LearningAlgorithms
                 population[population.Length - 1 - i].pers.set_links(long_to_doubl(population.Length - 1 - i));
                 population[population.Length - 2 - i].pers.set_links(long_to_doubl(population.Length - 2 - i));
             }
-        }
+        }*/
     }
 }
