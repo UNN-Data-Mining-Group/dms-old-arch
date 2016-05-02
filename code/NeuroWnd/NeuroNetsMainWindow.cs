@@ -543,6 +543,8 @@ namespace NeuroWnd
             else if (lbLASelected.Text.Equals("Алгоритм обратного распространения ошибки"))
             {
                 IParameterValueComparer comparer = null;
+                IParameterValueConverter converter = null;
+
                 if (types[types.Count - 1] == "Real")
                 {
                     ParameterValueType type = ParameterValueType.String;
@@ -559,6 +561,7 @@ namespace NeuroWnd
                             break;
                     }
                     comparer = new RealValueComparer((RealParameter)outParameter, type, type);
+                    converter = new RealParameterConverter(type, (RealParameter)outParameter);
                 }
                 else if (types[types.Count - 1] == "Int")
                 {
@@ -576,6 +579,7 @@ namespace NeuroWnd
                             break;
                     }
                     comparer = new IntegerValueComparer((IntegerParameter)outParameter, type, type);
+                    converter = new IntegerParameterConverter(type, (IntegerParameter)outParameter);
                 }
                 else if (types[types.Count - 1] == "Enum")
                 {
@@ -593,9 +597,10 @@ namespace NeuroWnd
                             break;
                     }
                     comparer = new EnumeratedValueComparer((EnumeratedParameter)outParameter, type, type);
+                    converter = new EnumeratedParameterConverter(type, (EnumeratedParameter)outParameter);
                 }
 
-                BackPropagationAlgorithmForm fm = new BackPropagationAlgorithmForm(Inn, convertedSelection, comparer);
+                BackPropagationAlgorithmForm fm = new BackPropagationAlgorithmForm(Inn, convertedSelection, comparer, converter);
                 fm.ShowDialog();
             }
             

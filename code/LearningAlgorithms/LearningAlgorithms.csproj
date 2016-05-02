@@ -56,6 +56,7 @@
     <Compile Include="Parameter\IntegerValueComparer.cs" />
     <Compile Include="Parameter\IParameter.cs" />
     <Compile Include="Parameter\IParameterValueComparer.cs" />
+    <Compile Include="Parameter\IParameterValueConverter.cs" />
     <Compile Include="Parameter\RealParameter.cs" />
     <Compile Include="Parameter\RealValueComparer.cs" />
     <Compile Include="Progres.cs">

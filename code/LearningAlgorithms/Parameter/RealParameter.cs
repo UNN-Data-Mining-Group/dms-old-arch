@@ -17,23 +17,33 @@ namespace NeuroWnd.Parameter
             }
         }
 
+        public double MinRange { get; private set; }
+
         public RealParameter(List<string> values)
         {
             if (values == null || values.Count == 0)
                 throw new ArgumentException("values must contain at least one element");
 
             minValue = maxValue = Convert.ToDouble(values[0].Replace(".", ","));
-
+            List<double> numbers = new List<double>();
             foreach (string item in values)
             {
                 double val = Convert.ToDouble(item.Replace(".", ","));
 
+                if (!numbers.Contains(val))
+                    numbers.Add(val);
+
                 minValue = Math.Min(minValue, val);
                 maxValue = Math.Max(maxValue, val);
             }
+            numbers.Sort();
+            MinRange = double.PositiveInfinity;
+            for (int i = 0; i < numbers.Count - 1; i ++)
+            {
+                MinRange = Math.Min(MinRange, Math.Abs(numbers[i] - numbers[i+1]));
+            }
 
-            double size = (maxValue - minValue) + 1;
-            countNumbers = Convert.ToInt32(Math.Log10(2 * size)) + 1;
+            countNumbers = -Convert.ToInt32(Math.Log10(MinRange)) + 1;
         }
 
         public string GetFromNormalized(int value)
@@ -44,8 +54,13 @@ namespace NeuroWnd.Parameter
 
         public string GetFromNormalized(double value)
         {
-            if (value <= 0.0 || value >= 1.0)
-                throw new ArgumentOutOfRangeException();
+            /*if (value < 0.0 || value > 1.0)
+                throw new ArgumentOutOfRangeException();*/
+
+            if (value < 0.0)
+                value = 0.0;
+            else if (value > 1.0)
+                value = 1.0;
 
             double size = maxValue - minValue;
             return Convert.ToString(minValue + value * size);
@@ -53,8 +68,8 @@ namespace NeuroWnd.Parameter
 
         public string Get(double value)
         {
-            if (value < minValue || value > maxValue)
-                throw new ArgumentOutOfRangeException();
+            /*if (value < minValue || value > maxValue)
+                throw new ArgumentOutOfRangeException();*/
             return Convert.ToString(value);
         }
 
@@ -63,15 +78,7 @@ namespace NeuroWnd.Parameter
             double temp = Convert.ToDouble(value.Replace(".", ","));
 
             if (temp < minValue || temp > maxValue)
-            {
-                if (temp < minValue)
-                    minValue = temp;
-                else if (temp > maxValue)
-                    maxValue = temp;
-
-                double size = (maxValue - minValue) + 1;
-                countNumbers = Convert.ToInt32(Math.Log10(2 * size)) + 1;
-            }
+                throw new ArgumentOutOfRangeException();
 
             return temp;
         }

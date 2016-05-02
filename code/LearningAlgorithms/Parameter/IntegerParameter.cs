@@ -44,10 +44,16 @@ namespace NeuroWnd.Parameter
 
         public string GetFromNormalized(double value)
         {
-            if (value <= 0.0 || value >= 1.0)
-                throw new ArgumentOutOfRangeException();
+            /*if (value <= 0.0 || value >= 1.0)
+                throw new ArgumentOutOfRangeException();*/
 
             double step = 1.0 / (2 * countValues);
+
+            if (value <= 0.0)
+                value = step;
+            else if (value >= 1.0)
+                value = 1 - step;
+
             value -= step;
             value = minValue + value*countValues;
             return Convert.ToString(Convert.ToInt32(value));
@@ -55,8 +61,8 @@ namespace NeuroWnd.Parameter
 
         public string Get(int value)
         {
-            if (value < minValue || value > maxValue)
-                throw new ArgumentOutOfRangeException();
+            /*if (value < minValue || value > maxValue)
+                throw new ArgumentOutOfRangeException();*/
             return Convert.ToString(value);
         }
 
@@ -65,15 +71,7 @@ namespace NeuroWnd.Parameter
             int temp = Convert.ToInt32(value);
 
             if (temp < minValue || temp > maxValue)
-            {
-                if (temp < minValue)
-                    minValue = temp;
-                else if (temp > maxValue)
-                    maxValue = temp;
-
-                countValues = (maxValue - minValue) + 1;
-                countNumbers = Convert.ToInt32(Math.Log10(2 * countValues)) + 1;
-            }
+                throw new ArgumentOutOfRangeException();
 
             return temp;
         }
