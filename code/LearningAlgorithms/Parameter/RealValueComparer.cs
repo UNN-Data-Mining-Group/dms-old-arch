@@ -24,7 +24,7 @@ namespace LearningAlgorithms.Parameter
             _parameter = par;
             _type1 = t1;
             _type2 = t2;
-            _comparingRange = Math.Pow(10, -par.CountNumbers) / 2.0;
+            _comparingRange = par.MinRange / 2.0;
         }
 
         public bool isEqual(object value1, object value2)
@@ -32,7 +32,7 @@ namespace LearningAlgorithms.Parameter
             double v1 = getFromValue(value1, _type1);
             double v2 = getFromValue(value2, _type2);
 
-            if (Math.Abs(v1 - v2) <= _comparingRange)
+            if (Math.Abs(v1 - v2) < _comparingRange)
                 return true;
             else
                 return false;

@@ -42,7 +42,7 @@ namespace NeuroWnd.Activate_functions
             double speed = parameters[3].Value;
 
             double exp = Math.Exp(-Math.Pow((x - w0) / speed, 2));
-            return 2 * (maxVal + 1) * (w0 - x) * exp / (speed * speed);
+            return 2 * (maxVal + 1) * (w0 - x) * exp / speed;
         }
     }
 }
