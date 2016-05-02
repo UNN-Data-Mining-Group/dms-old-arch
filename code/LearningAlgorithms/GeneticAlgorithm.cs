@@ -6,9 +6,48 @@ using System.Threading;
 using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace LearningAlgorithms
 {
+    class neronnet1
+    {
+        bool[,] topologi;
+        double[,] weight;
+        public neronnet1(bool[,] topologi_)
+        {
+            topologi = topologi_;
+        }
+        public void set_links(double[,] weight_)
+        {
+            weight = weight_;
+        }
+        public double get_res(double[] x)
+        {
+            double res = 0;
+            res = start(x, topologi.GetLength(0)-1);
+            return res;
+        }
+        private double start(double[] x, int index)
+        {
+            double res = 0;
+            bool is_in = true;
+            for (int i = index - 1; i >= 0; i-- )
+            {
+                if(topologi[i,index])
+                {
+                    is_in = false;
+                    res += weight[i,index]*start(x, i);
+                }
+            }
+            if(is_in)
+            {
+                res = x[index];
+            }
+            
+            return 2 /(1 + Math.Exp(-1 * (res)));
+        }
+    }
     class GeneticAlgorithm : LearningAlgorithm
     {
         double eps = 1E-008, coef_mutation = 1E-004,persent_train = 0.1,selection_pesent = 0.1;
@@ -21,11 +60,12 @@ namespace LearningAlgorithms
         }
         bool is_rep_2;
         double min_err;
-        const int count_gen_in_hromosom = 8;
+        const int count_gen_in_hromosom = 30;
         person[] population;
         struct person
         {
-            public INeuroNetLearning pers;
+            public neronnet1 pers;
+            //public INeuroNetLearning pers;
             public long[] population_weight;
             public double err, average_error;
             public ulong live_time;
@@ -82,7 +122,9 @@ namespace LearningAlgorithms
                 {
                     if (topologi[i, j])
                     {
-                        res[i, j] = population[num_person].population_weight[num_hromosom] / max_weight - 1 / 2;
+                        double weight_to_double = population[num_person].population_weight[num_hromosom] * 2;
+                        double max_weight_to_doulbe = max_weight;
+                        res[i, j] = weight_to_double / max_weight_to_doulbe - 1;
                         num_hromosom++;
                     }
                     else
@@ -147,7 +189,8 @@ namespace LearningAlgorithms
             population = new person[count_person];
             for (int i = 0; i < count_person; i++)
             {
-                population[i].pers = solver.copy();//копируем решатели
+                //population[i].pers = solver.copy();//копируем решатели
+                population[i].pers = new neronnet1(topologi);
             }
             int count_hromosom = 0;
             for (int i = 0; i < topologi.GetLength(0); i++)
@@ -196,8 +239,26 @@ namespace LearningAlgorithms
 
                 
                 do
-                {   stopWatch.Start();
+                {  
+                    stopWatch.Start();
                     for (int i = 0; i < training_Y.Length / step_train; i++)
+                    {
+                        
+                       
+                        for (int j = i * step_train; j < step_train * (i + 1); j++)
+                        {
+                            Parallel.For(0, count_person, k =>
+                        {
+
+                            
+                                population[k].err += Math.Pow(training_Y[j] - population[k].pers.get_res(training_X[j]), 2);
+                            
+                        });// Parallel.For
+                            
+                        }
+                        selection(step_train);
+                    }
+                /*    for (int i = 0; i < training_Y.Length / step_train; i++)
                     {
                         for (int j = i * step_train; j < step_train * (i + 1); j++)
                         {
@@ -207,7 +268,7 @@ namespace LearningAlgorithms
                             }
                         }
                         selection(step_train);
-                    }
+                    }*/
                     if (step_train * (Convert.ToInt32(training_Y.Length / step_train )) < training_Y.Length)
                     {
                         for (int i = step_train * (Convert.ToInt32(training_Y.Length / step_train)); i < training_Y.Length; i++)
@@ -217,7 +278,8 @@ namespace LearningAlgorithms
                                 population[k].err += Math.Pow(training_Y[i] - population[k].pers.get_res(training_X[i]), 2);
                             }
                         }
-                        selection(training_Y.Length - Convert.ToInt32(persent_train * 100 * step_train));
+                        //selection(training_Y.Length - Convert.ToInt32(persent_train * 100 * step_train));
+                        selection(training_Y.Length - Convert.ToInt32(persent_train * step_train));
                     }
                     step++;
                     stopWatch.Stop();

@@ -50,14 +50,17 @@
             this.LB_res_eps = new System.Windows.Forms.Label();
             this.LB_err = new System.Windows.Forms.Label();
             this.LB_max_err = new System.Windows.Forms.Label();
-            this.LB_min_err = new System.Windows.Forms.Label();
             this.BT_write = new System.Windows.Forms.Button();
+            this.TB_persent_train = new System.Windows.Forms.TextBox();
+            this.LB_train_persent = new System.Windows.Forms.Label();
             this.GB_gen_par.SuspendLayout();
             this.GB_res.SuspendLayout();
             this.SuspendLayout();
             // 
             // GB_gen_par
             // 
+            this.GB_gen_par.Controls.Add(this.TB_persent_train);
+            this.GB_gen_par.Controls.Add(this.LB_train_persent);
             this.GB_gen_par.Controls.Add(this.CB_lin_repr);
             this.GB_gen_par.Controls.Add(this.TB_max_step);
             this.GB_gen_par.Controls.Add(this.LB_max_step);
@@ -73,7 +76,7 @@
             this.GB_gen_par.Controls.Add(this.LB_eps);
             this.GB_gen_par.Location = new System.Drawing.Point(12, 12);
             this.GB_gen_par.Name = "GB_gen_par";
-            this.GB_gen_par.Size = new System.Drawing.Size(340, 202);
+            this.GB_gen_par.Size = new System.Drawing.Size(340, 239);
             this.GB_gen_par.TabIndex = 0;
             this.GB_gen_par.TabStop = false;
             this.GB_gen_par.Text = "Параметры Генетического алгоритма";
@@ -81,7 +84,7 @@
             // CB_lin_repr
             // 
             this.CB_lin_repr.AutoSize = true;
-            this.CB_lin_repr.Location = new System.Drawing.Point(13, 179);
+            this.CB_lin_repr.Location = new System.Drawing.Point(12, 216);
             this.CB_lin_repr.Name = "CB_lin_repr";
             this.CB_lin_repr.Size = new System.Drawing.Size(144, 17);
             this.CB_lin_repr.TabIndex = 12;
@@ -192,7 +195,7 @@
             // 
             // BT_learn
             // 
-            this.BT_learn.Location = new System.Drawing.Point(277, 232);
+            this.BT_learn.Location = new System.Drawing.Point(277, 269);
             this.BT_learn.Name = "BT_learn";
             this.BT_learn.Size = new System.Drawing.Size(75, 53);
             this.BT_learn.TabIndex = 1;
@@ -206,7 +209,7 @@
             this.GB_res.Controls.Add(this.LB_res_count_step);
             this.GB_res.Controls.Add(this.TB_res_eps);
             this.GB_res.Controls.Add(this.LB_res_eps);
-            this.GB_res.Location = new System.Drawing.Point(12, 220);
+            this.GB_res.Location = new System.Drawing.Point(12, 257);
             this.GB_res.Name = "GB_res";
             this.GB_res.Size = new System.Drawing.Size(258, 76);
             this.GB_res.TabIndex = 12;
@@ -248,7 +251,7 @@
             // LB_err
             // 
             this.LB_err.AutoSize = true;
-            this.LB_err.Location = new System.Drawing.Point(21, 299);
+            this.LB_err.Location = new System.Drawing.Point(21, 336);
             this.LB_err.Name = "LB_err";
             this.LB_err.Size = new System.Drawing.Size(31, 13);
             this.LB_err.TabIndex = 13;
@@ -257,25 +260,16 @@
             // LB_max_err
             // 
             this.LB_max_err.AutoSize = true;
-            this.LB_max_err.Location = new System.Drawing.Point(21, 312);
+            this.LB_max_err.Location = new System.Drawing.Point(21, 349);
             this.LB_max_err.Name = "LB_max_err";
             this.LB_max_err.Size = new System.Drawing.Size(56, 13);
             this.LB_max_err.TabIndex = 14;
             this.LB_max_err.Text = "max_err = ";
             // 
-            // LB_min_err
-            // 
-            this.LB_min_err.AutoSize = true;
-            this.LB_min_err.Location = new System.Drawing.Point(21, 325);
-            this.LB_min_err.Name = "LB_min_err";
-            this.LB_min_err.Size = new System.Drawing.Size(53, 13);
-            this.LB_min_err.TabIndex = 15;
-            this.LB_min_err.Text = "min_err = ";
-            // 
             // BT_write
             // 
             this.BT_write.Enabled = false;
-            this.BT_write.Location = new System.Drawing.Point(277, 291);
+            this.BT_write.Location = new System.Drawing.Point(277, 328);
             this.BT_write.Name = "BT_write";
             this.BT_write.Size = new System.Drawing.Size(75, 53);
             this.BT_write.TabIndex = 16;
@@ -283,13 +277,29 @@
             this.BT_write.UseVisualStyleBackColor = true;
             this.BT_write.Click += new System.EventHandler(this.BT_write_Click);
             // 
+            // TB_persent_train
+            // 
+            this.TB_persent_train.Location = new System.Drawing.Point(210, 178);
+            this.TB_persent_train.Name = "TB_persent_train";
+            this.TB_persent_train.Size = new System.Drawing.Size(100, 20);
+            this.TB_persent_train.TabIndex = 14;
+            this.TB_persent_train.Text = "8E-001";
+            // 
+            // LB_train_persent
+            // 
+            this.LB_train_persent.AutoSize = true;
+            this.LB_train_persent.Location = new System.Drawing.Point(10, 181);
+            this.LB_train_persent.Name = "LB_train_persent";
+            this.LB_train_persent.Size = new System.Drawing.Size(146, 13);
+            this.LB_train_persent.TabIndex = 13;
+            this.LB_train_persent.Text = "Процент тестовой выборки";
+            // 
             // GeneticAlgorithmForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(361, 358);
+            this.ClientSize = new System.Drawing.Size(364, 416);
             this.Controls.Add(this.BT_write);
-            this.Controls.Add(this.LB_min_err);
             this.Controls.Add(this.LB_max_err);
             this.Controls.Add(this.LB_err);
             this.Controls.Add(this.GB_res);
@@ -330,7 +340,8 @@
         private System.Windows.Forms.CheckBox CB_lin_repr;
         private System.Windows.Forms.Label LB_err;
         private System.Windows.Forms.Label LB_max_err;
-        private System.Windows.Forms.Label LB_min_err;
         private System.Windows.Forms.Button BT_write;
+        private System.Windows.Forms.TextBox TB_persent_train;
+        private System.Windows.Forms.Label LB_train_persent;
     }
 }

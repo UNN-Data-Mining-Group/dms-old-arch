@@ -15,19 +15,27 @@ namespace LearningAlgorithms
         INeuroNetLearning solver;
         GeneticAlgorithm gen;
         double[,] training_set;
+        double[,] test_set;
+        double[,] all_set;
+        double train_persent;
+        int training_size, test_size;
+        double EPS;
         public GeneticAlgorithmForm(INeuroNetLearning solver_, double[,] training_set_)
         {
             InitializeComponent();
             gen = new GeneticAlgorithm();
             solver = solver_;
-            training_set = training_set_;
+            all_set = training_set_;
         }
         
         private void BT_learn_Click(object sender, EventArgs e)
         {
-            string[] err = { "Неверное значение eps", "Неверное значение количества особей","Неверное значение коэффициента мутации"
-                               ,"Неверное значение процента обучающей выборки","Неверное значение процента скрещивания","Неверное значение максимального числа шагов" };
-            
+            string[] err = { "Неверное значение eps", "Неверное значение количества особей",
+                               "Неверное значение коэффициента мутации",
+                               "Неверное значение процента обучающей выборки",
+                               "Неверное значение процента скрещивания",
+                               "Неверное значение максимального числа шагов",
+                               "Неверное значение процента тестовой выборки"};
             int i = 0;
             try
             {
@@ -43,13 +51,16 @@ namespace LearningAlgorithms
                 i++;
                 gen.set_max_step(Convert.ToInt32(TB_max_step.Text.ToString()));
                 i++;
+                train_persent = Convert.ToDouble(TB_persent_train.Text.ToString());
+                i++;
             }
             catch (System.Exception ex)
             {
                 System.Windows.Forms.MessageBox.Show(err[i]);
             }
-            if (i == 6)
+            if (i == 7)
             {
+                parser(all_set);
                 BT_learn.Enabled = false;
                 gen.genom(solver, training_set, CB_lin_repr.Checked);
                 BT_learn.Enabled = true;
@@ -57,39 +68,85 @@ namespace LearningAlgorithms
                 TB_res_count_step.Text = gen.get_step().ToString();
                 TB_res_eps.Text = gen.get_min_err().ToString();
                 gen.save_result();
-                double[][] training_X = new double[training_set.GetLength(0)][];
-                double[] training_Y = new double[training_set.GetLength(0)];
+                        
+                LB_err.Text = "Ошибка на обучающей выборке = " + get_error(training_set).ToString();
+                LB_max_err.Text = "Ошибка на тестовой выборке = " + get_error(test_set).ToString();  
+               
+            }
+        }
 
-                for (int j = 0; j < training_set.GetLength(0); j++)
+        private double get_error(double[,] set)
+        {
+            double[][] training_X = new double[set.GetLength(0)][];
+            double[] training_Y = new double[set.GetLength(0)];
+
+            for (int j = 0; j < set.GetLength(0); j++)
+            {
+                training_X[j] = new double[set.GetLength(1) - 1];
+                training_Y[j] = set[j, training_set.GetLength(1) - 1];
+                for (int k = 0; k < set.GetLength(1) - 1; k++)
                 {
-                    training_X[j] = new double[training_set.GetLength(1) - 1];
-                    training_Y[j] = training_set[j, training_set.GetLength(1) - 1];
-                    for (int k = 0; k < training_set.GetLength(1) - 1; k++)
-                    {
-                        training_X[j][k] = training_set[j, k];
-                    }
+                    training_X[j][k] = set[j, k];
                 }
-                double error = 0;
-                double max_err = 0,min_err = Double.MaxValue;
-                double tmp_err;
-                for (int j = 0; j < training_Y.Length; j++)
+            }       
+            double error = 0;
+            for (int j = 0; j < training_Y.Length; j++)
+            {
+                double res = solver.get_res(training_X[j]);
+                if( Math.Abs(training_Y[j] - res) > EPS)
                 {
-                    double res = solver.get_res(training_X[j]);
-                    tmp_err = Math.Pow(training_Y[j] - res, 2);
-                    if (tmp_err > max_err)
-                    {
-                        max_err = tmp_err;
-                    }
-                    if (tmp_err < min_err)
-                    {
-                        min_err = tmp_err;
-                    }
-                    error += tmp_err;
+                    error += 1;
+                }                
+            }
+            error /= training_Y.Length;
+            return error;
+        }
+
+        private void parser(double[,] training_set_)
+        {
+            Random rand = new Random();
+            int tmp;
+            double max,min;
+            max = min = training_set_[0,training_set_.GetLength(1) - 1];
+            for(int i = 0; i < training_set_.GetLength(0); i++)
+            {
+                if (max < training_set_[i, training_set_.GetLength(1) - 1])
+                    max = training_set_[i, training_set_.GetLength(1) - 1];
+                if (min > training_set_[i, training_set_.GetLength(1) - 1])
+                    min = training_set_[i, training_set_.GetLength(1) - 1];
+            }
+            int p = Convert.ToInt32(Math.Log10(2 * (max - min))) + 1;
+            EPS = Math.Pow(10, -p) / 2;
+            bool[] is_added = new bool[training_set_.GetLength(0)];
+            for (int i = 0; i < training_set_.GetLength(0); i++)
+            {
+                is_added[i] = false;
+            }
+            training_size = Convert.ToInt32(Convert.ToDouble(training_set_.GetLength(0)) * train_persent);
+            test_size = training_set_.GetLength(0) - training_size;
+            training_set = new double[training_size, training_set_.GetLength(1)]; 
+            test_set = new double[test_size,training_set_.GetLength(1)];
+            for(int i = 0; i < training_size; )
+            {
+                tmp = rand.Next(0, training_set_.GetLength(0));
+                if(!is_added[tmp])
+                {
+                    is_added[tmp] = true;
+
+                    for (int j = 0; j < training_set.GetLength(1); j++)
+                        training_set[i, j] = training_set_[tmp, j];
+                    i++;
                 }
-                error /= training_Y.Length;
-                LB_err.Text = "err = "+error.ToString();
-                LB_max_err.Text = "max_err = " + max_err.ToString();
-                LB_min_err.Text = "min_err = " + min_err.ToString();
+            }
+            tmp = 0;
+            for (int i = 0; i < training_set_.GetLength(0); i++)
+            {
+                if (!is_added[i])
+                {
+                    for (int j = 0; j < test_set.GetLength(1); j++)
+                        test_set[tmp, j] = training_set_[i, j];
+                    tmp++;
+                }
             }
         }
 
