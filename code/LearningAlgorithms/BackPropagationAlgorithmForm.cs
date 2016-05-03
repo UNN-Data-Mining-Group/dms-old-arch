@@ -156,6 +156,8 @@ namespace LearningAlgorithms
                     } while (currentIteration < iterations && !worker.CancellationPending &&
                              requiredError <= Convert.ToInt32(testError1*100.0));
                 }
+
+                save_result();
                 isLearningCompleted = true;
                 double err = 0.0;
                 using (StreamWriter writer = new StreamWriter("answers.txt"))
@@ -183,6 +185,23 @@ namespace LearningAlgorithms
                 isLearningCompleted = false;
             }
             
+        }
+
+
+        private void save_result()
+        {
+            using (System.IO.StreamWriter stream = new System.IO.StreamWriter("data\\matrix_back.txt"))
+            {
+                double[,] tmp = neuroNet.get_links();
+                for (int i = 0; i < tmp.GetLength(0); i++)
+                {
+                    for (int j = 0; j < tmp.GetLength(1); j++)
+                    {
+                        stream.Write("{0} ", tmp[i, j]);
+                    }
+                    stream.WriteLine();
+                }
+            }
         }
 
         private void btnLearn_Click(object sender, EventArgs e)

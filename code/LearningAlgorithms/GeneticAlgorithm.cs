@@ -10,6 +10,15 @@ using System.Threading.Tasks;
 
 namespace LearningAlgorithms
 {
+    public class ReverseComparer : System.Collections.IComparer
+    {
+        // Call CaseInsensitiveComparer.Compare with the parameters reversed.
+        public int Compare(Object x, Object y)
+        {
+            return (new System.Collections.CaseInsensitiveComparer()).Compare(y, x);
+        }
+    }
+
     class neronnet1
     {
         bool[,] topologi;
@@ -60,7 +69,7 @@ namespace LearningAlgorithms
         }
         bool is_rep_2;
         double min_err;
-        const int count_gen_in_hromosom = 30;
+        const int count_gen_in_hromosom = 16;
         person[] population;
         struct person
         {
@@ -122,9 +131,9 @@ namespace LearningAlgorithms
                 {
                     if (topologi[i, j])
                     {
-                        double weight_to_double = population[num_person].population_weight[num_hromosom] * 2;
+                        double weight_to_double = population[num_person].population_weight[num_hromosom] * 4;
                         double max_weight_to_doulbe = max_weight;
-                        res[i, j] = weight_to_double / max_weight_to_doulbe - 1;
+                        res[i, j] = weight_to_double / max_weight_to_doulbe - 2;
                         num_hromosom++;
                     }
                     else
@@ -137,7 +146,7 @@ namespace LearningAlgorithms
         }
         private void sort_person()
         {
-            person tmp;
+           /* person tmp;
             for (int i = 0; i < population.Length; i++)
             {
                 for (int j = i; j < population.Length; j++)
@@ -149,7 +158,8 @@ namespace LearningAlgorithms
                         population[j] = tmp;
                     }
                 }
-            }
+            }*/
+            Array.Sort(population, (a, b) => a.average_error.CompareTo(b.average_error));
         }
         System.Windows.Forms.ProgressBar pb;
         public void save_result()
