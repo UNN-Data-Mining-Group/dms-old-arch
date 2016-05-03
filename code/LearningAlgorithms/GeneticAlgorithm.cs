@@ -10,6 +10,15 @@ using System.Threading.Tasks;
 
 namespace LearningAlgorithms
 {
+    public class ReverseComparer : System.Collections.IComparer
+    {
+        // Call CaseInsensitiveComparer.Compare with the parameters reversed.
+        public int Compare(Object x, Object y)
+        {
+            return (new System.Collections.CaseInsensitiveComparer()).Compare(y, x);
+        }
+    }
+
     class neronnet1
     {
         bool[,] topologi;
@@ -25,34 +34,34 @@ namespace LearningAlgorithms
         public double get_res(double[] x)
         {
             double res = 0;
-            res = start(x, topologi.GetLength(0)-1);
+            res = start(x, topologi.GetLength(0) - 1);
             return res;
         }
         private double start(double[] x, int index)
         {
             double res = 0;
             bool is_in = true;
-            for (int i = index - 1; i >= 0; i-- )
+            for (int i = index - 1; i >= 0; i--)
             {
-                if(topologi[i,index])
+                if (topologi[i, index])
                 {
                     is_in = false;
-                    res += weight[i,index]*start(x, i);
+                    res += weight[i, index] * start(x, i);
                 }
             }
-            if(is_in)
+            if (is_in)
             {
                 res = x[index];
             }
-            
-            return 2 /(1 + Math.Exp(-1 * (res)));
+
+            return 2 / (1 + Math.Exp(-1 * (res)));
         }
     }
     class GeneticAlgorithm : LearningAlgorithm
     {
-        double eps = 1E-008, coef_mutation = 1E-004,persent_train = 0.1,selection_pesent = 0.1;
-        int count_person = 100,step_train,max_learning_step = 10000;
-        int step,train, best_population_num;
+        double eps = 1E-008, coef_mutation = 1E-004, persent_train = 0.1, selection_pesent = 0.1;
+        int count_person = 100, step_train, max_learning_step = 10000;
+        int step, train, best_population_num;
 
         public override string Name
         {
@@ -60,7 +69,7 @@ namespace LearningAlgorithms
         }
         bool is_rep_2;
         double min_err;
-        const int count_gen_in_hromosom = 30;
+        const int count_gen_in_hromosom = 16;
         person[] population;
         struct person
         {
@@ -122,9 +131,9 @@ namespace LearningAlgorithms
                 {
                     if (topologi[i, j])
                     {
-                        double weight_to_double = population[num_person].population_weight[num_hromosom] * 2;
+                        double weight_to_double = population[num_person].population_weight[num_hromosom] * 4;
                         double max_weight_to_doulbe = max_weight;
-                        res[i, j] = weight_to_double / max_weight_to_doulbe - 1;
+                        res[i, j] = weight_to_double / max_weight_to_doulbe - 2;
                         num_hromosom++;
                     }
                     else
@@ -137,19 +146,21 @@ namespace LearningAlgorithms
         }
         private void sort_person()
         {
-            person tmp;
-            for (int i = 0; i < population.Length; i++)
-            {
-                for (int j = i; j < population.Length; j++)
-                {
-                    if (population[i].average_error - population[j].average_error > 1E-030)
-                    {
-                        tmp = population[i];
-                        population[i] = population[j];
-                        population[j] = tmp;
-                    }
-                }
-            }
+            Array.Sort(population, new Comparison<person>((a, b) => a.average_error.CompareTo(b.average_error)));
+            /*
+             person tmp;
+             for (int i = 0; i < population.Length; i++)
+             {
+                 for (int j = i; j < population.Length; j++)
+                 {
+                     if (population[i].average_error - population[j].average_error > 1E-030)
+                     {
+                         tmp = population[i];
+                         population[i] = population[j];
+                         population[j] = tmp;
+                     }
+                 }
+             }*/
         }
         System.Windows.Forms.ProgressBar pb;
         public void save_result()
@@ -160,7 +171,7 @@ namespace LearningAlgorithms
                 for (int i = 0; i < tmp.GetLength(0); i++)
                 {
                     for (int j = 0; j < tmp.GetLength(1); j++)
-                    {                        
+                    {
                         stream.Write("{0} ", tmp[i, j]);
                     }
                     stream.WriteLine();
@@ -168,7 +179,7 @@ namespace LearningAlgorithms
             }
 
         }
-        public void genom(INeuroNetLearning solver, double[,] training_set_,bool is_rep_2_)//начало работы генетического алгоритма
+        public void genom(INeuroNetLearning solver, double[,] training_set_, bool is_rep_2_)//начало работы генетического алгоритма
         {
             is_rep_2 = is_rep_2_;
             best_population_num = 0;
@@ -205,7 +216,7 @@ namespace LearningAlgorithms
             }
 
             set_default_weight(count_hromosom);
-            
+
             for (int i = 0; i < count_person; i++)
             {
                 population[i].pers.set_links(long_to_doubl(i));//задаём новые веса, полная матрица весов
@@ -220,56 +231,56 @@ namespace LearningAlgorithms
         private void start_genom()
         {
 
-            step = 0;             
+            step = 0;
             Progres pg = new Progres();
-            
+
             Thread t1 = new Thread(new ThreadStart(delegate
-                {                    
+                {
                     pb = pg.get_pg();
                     pb.Maximum = max_learning_step;
                     del = new MyDel(pg.start);
                     label2 = pg.get_lb();
                     pg.ShowDialog();
-                    
+
                 }));
             Thread t = new Thread(new ThreadStart(delegate
             {
                 Stopwatch stopWatch = new Stopwatch();
-                
 
-                
+
+
                 do
-                {  
+                {
                     stopWatch.Start();
                     for (int i = 0; i < training_Y.Length / step_train; i++)
                     {
-                        
-                       
+
+
                         for (int j = i * step_train; j < step_train * (i + 1); j++)
                         {
                             Parallel.For(0, count_person, k =>
                         {
 
-                            
-                                population[k].err += Math.Pow(training_Y[j] - population[k].pers.get_res(training_X[j]), 2);
-                            
+
+                            population[k].err += Math.Pow(training_Y[j] - population[k].pers.get_res(training_X[j]), 2);
+
                         });// Parallel.For
-                            
+
                         }
                         selection(step_train);
                     }
-                /*    for (int i = 0; i < training_Y.Length / step_train; i++)
-                    {
-                        for (int j = i * step_train; j < step_train * (i + 1); j++)
+                    /*    for (int i = 0; i < training_Y.Length / step_train; i++)
                         {
-                            for (int k = 0; k < count_person; k++)
+                            for (int j = i * step_train; j < step_train * (i + 1); j++)
                             {
-                                population[k].err += Math.Pow(training_Y[j] - population[k].pers.get_res(training_X[j]), 2);
+                                for (int k = 0; k < count_person; k++)
+                                {
+                                    population[k].err += Math.Pow(training_Y[j] - population[k].pers.get_res(training_X[j]), 2);
+                                }
                             }
-                        }
-                        selection(step_train);
-                    }*/
-                    if (step_train * (Convert.ToInt32(training_Y.Length / step_train )) < training_Y.Length)
+                            selection(step_train);
+                        }*/
+                    if (step_train * (Convert.ToInt32(training_Y.Length / step_train)) < training_Y.Length)
                     {
                         for (int i = step_train * (Convert.ToInt32(training_Y.Length / step_train)); i < training_Y.Length; i++)
                         {
@@ -309,10 +320,10 @@ namespace LearningAlgorithms
                         {
                             pb.Value = step;
                         }));
-                   else
+                    else
                         pb.Value = step;
 
-                   // pb.Value++;
+                    // pb.Value++;
                 } while ((step < max_learning_step) && (is_not_stop()));
                 if (pb.InvokeRequired)
                     pb.BeginInvoke(new MethodInvoker(delegate
@@ -325,7 +336,7 @@ namespace LearningAlgorithms
             t1.Start();
             t.Start();
             t.Join();
-            
+
             if (pg.InvokeRequired)
                 pg.BeginInvoke(new MethodInvoker(delegate
                 {
@@ -334,8 +345,8 @@ namespace LearningAlgorithms
             else
                 pg.Close();
             t1.Join();
-           
-            
+
+
 
         }
 
@@ -350,11 +361,11 @@ namespace LearningAlgorithms
                 population[i].good_live = 0;
                 for (int j = 0; j < count_hromosom; j++)
                 {
-                    population[i].population_weight[j] = rand.Next(0, max_weight);                   
+                    population[i].population_weight[j] = rand.Next(0, max_weight);
                 }
             }
         }
-       
+
         private bool is_not_stop()
         {
             int i = 0;
@@ -385,14 +396,14 @@ namespace LearningAlgorithms
             //Array.Sort(population, new Comparison<person>((a, b) => a.average_error.CompareTo(b.average_error)));
             sort_person();
             if (!is_rep_2)
-            { 
+            {
                 Reproduction();
-            } 
+            }
             else
             {
                 //Reproduction_2();
             }
-           
+
             for (int i = 0; i < train; i++)
             {
                 population[i].good_live++;
@@ -425,7 +436,7 @@ namespace LearningAlgorithms
                     if (rand.NextDouble() < coef_mutation)
                     {
                         long mut = rand.Next(0, max_weight);
-                       
+
                         population[population.Length - 1 - i].population_weight[j] ^= mut;
                     }
                     tmp = population[i].population_weight[j] & (~tmp_);
@@ -437,39 +448,39 @@ namespace LearningAlgorithms
 
                         population[population.Length - 2 - i].population_weight[j] ^= mut;
                     }
-                   
+
                 }
                 population[population.Length - 1 - i].pers.set_links(long_to_doubl(population.Length - 1 - i));
                 population[population.Length - 2 - i].pers.set_links(long_to_doubl(population.Length - 2 - i));
             }
         }
-    /*    private void Reproduction_2()
-        {
-            double tmp, tmp_,r;
-            const int max_weight = 1 << count_gen_in_hromosom;
-            for (int i = 0; i < train - 1; i += 2)
+        /*    private void Reproduction_2()
             {
-                for (int j = 0; j < population[i].population_weight.Length; j++)
+                double tmp, tmp_,r;
+                const int max_weight = 1 << count_gen_in_hromosom;
+                for (int i = 0; i < train - 1; i += 2)
                 {
-                    r = (2 * rand.NextDouble() - 1);
-                    tmp = population[i].population_weight[j] / max_weight - 1 / 2;
-                    tmp_ = population[i + 1].population_weight[j] / max_weight - 1 / 2;
-                    population[population.Length - 1 - i].population_weight[j] =BitConverter.DoubleToInt64Bits(tmp
-                        + r*(tmp - tmp_));
-                    if (rand.NextDouble() < coef_mutation)
+                    for (int j = 0; j < population[i].population_weight.Length; j++)
                     {
-                        population[population.Length - 1 - i].population_weight[j] = BitConverter.DoubleToInt64Bits(2 * rand.NextDouble() - 1);
+                        r = (2 * rand.NextDouble() - 1);
+                        tmp = population[i].population_weight[j] / max_weight - 1 / 2;
+                        tmp_ = population[i + 1].population_weight[j] / max_weight - 1 / 2;
+                        population[population.Length - 1 - i].population_weight[j] =BitConverter.DoubleToInt64Bits(tmp
+                            + r*(tmp - tmp_));
+                        if (rand.NextDouble() < coef_mutation)
+                        {
+                            population[population.Length - 1 - i].population_weight[j] = BitConverter.DoubleToInt64Bits(2 * rand.NextDouble() - 1);
+                        }
+                        population[population.Length - 2 - i].population_weight[j] = BitConverter.DoubleToInt64Bits(tmp_
+                            + r * (tmp_ - tmp)); 
+                        if (rand.NextDouble() < coef_mutation)
+                        {
+                            population[population.Length - 2 - i].population_weight[j] = BitConverter.DoubleToInt64Bits(2 * rand.NextDouble() - 1);
+                        }                   
                     }
-                    population[population.Length - 2 - i].population_weight[j] = BitConverter.DoubleToInt64Bits(tmp_
-                        + r * (tmp_ - tmp)); 
-                    if (rand.NextDouble() < coef_mutation)
-                    {
-                        population[population.Length - 2 - i].population_weight[j] = BitConverter.DoubleToInt64Bits(2 * rand.NextDouble() - 1);
-                    }                   
+                    population[population.Length - 1 - i].pers.set_links(long_to_doubl(population.Length - 1 - i));
+                    population[population.Length - 2 - i].pers.set_links(long_to_doubl(population.Length - 2 - i));
                 }
-                population[population.Length - 1 - i].pers.set_links(long_to_doubl(population.Length - 1 - i));
-                population[population.Length - 2 - i].pers.set_links(long_to_doubl(population.Length - 2 - i));
-            }
-        }*/
+            }*/
     }
 }

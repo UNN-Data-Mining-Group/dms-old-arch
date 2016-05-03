@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Threading;
+using LearningAlgorithms.Parameter;
 
 namespace LearningAlgorithms
 {
@@ -20,9 +21,11 @@ namespace LearningAlgorithms
         double train_persent;
         int training_size, test_size;
         double EPS;
-        public GeneticAlgorithmForm(INeuroNetLearning solver_, double[,] training_set_)
+        IParameterValueComparer comparer;
+        public GeneticAlgorithmForm(INeuroNetLearning solver_, double[,] training_set_, IParameterValueComparer comparer_)
         {
             InitializeComponent();
+            comparer = comparer_;
             gen = new GeneticAlgorithm();
             solver = solver_;
             all_set = training_set_;
@@ -93,7 +96,8 @@ namespace LearningAlgorithms
             for (int j = 0; j < training_Y.Length; j++)
             {
                 double res = solver.get_res(training_X[j]);
-                if( Math.Abs(training_Y[j] - res) > EPS)
+               // if( Math.Abs(training_Y[j] - res) > EPS)
+                if (!comparer.isEqual(training_Y[j], res))
                 {
                     error += 1;
                 }                

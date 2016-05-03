@@ -535,65 +535,66 @@ namespace NeuroWnd
                     }
                 }
             }
+            IParameterValueComparer comparer = null;
+            if (types[types.Count - 1] == "Real")
+            {
+                ParameterValueType type = ParameterValueType.String;
+                switch (cbReal.SelectedIndex)
+                {
+                    case 0:
+                        type = ParameterValueType.Real;
+                        break;
+                    case 1:
+                        type = ParameterValueType.NormalisedInteger;
+                        break;
+                    case 2:
+                        type = ParameterValueType.NormalisedReal;
+                        break;
+                }
+                comparer = new RealValueComparer((RealParameter)outParameter, type, type);
+            }
+            else if (types[types.Count - 1] == "Int")
+            {
+                ParameterValueType type = ParameterValueType.String;
+                switch (cbInt.SelectedIndex)
+                {
+                    case 0:
+                        type = ParameterValueType.Integer;
+                        break;
+                    case 1:
+                        type = ParameterValueType.NormalisedInteger;
+                        break;
+                    case 2:
+                        type = ParameterValueType.NormalisedReal;
+                        break;
+                }
+                comparer = new IntegerValueComparer((IntegerParameter)outParameter, type, type);
+            }
+            else if (types[types.Count - 1] == "Enum")
+            {
+                ParameterValueType type = ParameterValueType.String;
+                switch (cbEnum.SelectedIndex)
+                {
+                    case 0:
+                        type = ParameterValueType.Integer;
+                        break;
+                    case 1:
+                        type = ParameterValueType.NormalisedInteger;
+                        break;
+                    case 2:
+                        type = ParameterValueType.NormalisedReal;
+                        break;
+                }
+                comparer = new EnumeratedValueComparer((EnumeratedParameter)outParameter, type, type);
+            }
             if (lbLASelected.Text.Equals("Генетический алгоритм"))
             {
-                GeneticAlgorithmForm fm = new GeneticAlgorithmForm(Inn, convertedSelection);
+                GeneticAlgorithmForm fm = new GeneticAlgorithmForm(Inn, convertedSelection, comparer);
                 fm.ShowDialog();
             }
             else if (lbLASelected.Text.Equals("Алгоритм обратного распространения ошибки"))
             {
-                IParameterValueComparer comparer = null;
-                if (types[types.Count - 1] == "Real")
-                {
-                    ParameterValueType type = ParameterValueType.String;
-                    switch (cbReal.SelectedIndex)
-                    {
-                        case 0:
-                            type = ParameterValueType.Real;
-                            break;
-                        case 1:
-                            type = ParameterValueType.NormalisedInteger;
-                            break;
-                        case 2:
-                            type = ParameterValueType.NormalisedReal;
-                            break;
-                    }
-                    comparer = new RealValueComparer((RealParameter)outParameter, type, type);
-                }
-                else if (types[types.Count - 1] == "Int")
-                {
-                    ParameterValueType type = ParameterValueType.String;
-                    switch (cbInt.SelectedIndex)
-                    {
-                        case 0:
-                            type = ParameterValueType.Integer;
-                            break;
-                        case 1:
-                            type = ParameterValueType.NormalisedInteger;
-                            break;
-                        case 2:
-                            type = ParameterValueType.NormalisedReal;
-                            break;
-                    }
-                    comparer = new IntegerValueComparer((IntegerParameter)outParameter, type, type);
-                }
-                else if (types[types.Count - 1] == "Enum")
-                {
-                    ParameterValueType type = ParameterValueType.String;
-                    switch (cbEnum.SelectedIndex)
-                    {
-                        case 0:
-                            type = ParameterValueType.Integer;
-                            break;
-                        case 1:
-                            type = ParameterValueType.NormalisedInteger;
-                            break;
-                        case 2:
-                            type = ParameterValueType.NormalisedReal;
-                            break;
-                    }
-                    comparer = new EnumeratedValueComparer((EnumeratedParameter)outParameter, type, type);
-                }
+                
 
                 BackPropagationAlgorithmForm fm = new BackPropagationAlgorithmForm(Inn, convertedSelection, comparer);
                 fm.ShowDialog();
@@ -618,7 +619,7 @@ namespace NeuroWnd
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Perceptron pc = new Perceptron();
+          /*  Perceptron pc = new Perceptron();
             int[] neurs = {2, 9, 1};
             bool[,] top = pc.CreateNet(12, 3, neurs);
             double[,] weights = new double[12,12];
@@ -650,7 +651,7 @@ namespace NeuroWnd
             ga.ShowDialog();
 
             NeuroNetSolvingWindow solvingWnd = new NeuroNetSolvingWindow(nn);
-            solvingWnd.Show();
+            solvingWnd.Show(); */
         }
     }
 }
