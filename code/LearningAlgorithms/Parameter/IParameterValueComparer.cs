@@ -16,6 +16,7 @@ namespace LearningAlgorithms.Parameter
 
     public interface IParameterValueComparer
     {
+        double ComparingRange { get; set; }
         bool isEqual(object value1, object value2);
     }
 }

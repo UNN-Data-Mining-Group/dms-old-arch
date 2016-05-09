@@ -121,7 +121,7 @@ namespace LearningAlgorithms
 
         private double[,] initializeRandom(int neuronsCount, bool[,] topologyMatrix)
         {
-            Random rnd = new Random();
+            Random rnd = new Random(13052016);
             double[,] weights = new double[neuronsCount, neuronsCount];
 
             for (int i = 0; i < neuronsCount; i++)

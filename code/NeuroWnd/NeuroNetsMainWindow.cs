@@ -27,7 +27,7 @@ namespace NeuroWnd
 
         private void LoadInformationForUsingNeuroNets()
         {
-            cbInt.SelectedIndex = cbEnum.SelectedIndex = cbReal.SelectedIndex = 0;
+            cbInt.SelectedIndex = cbEnum.SelectedIndex = cbReal.SelectedIndex = 2;
 
             neuroNetsInfo.Clear();
             learningInfo.Clear();
@@ -485,7 +485,7 @@ namespace NeuroWnd
                     IntegerParameter ip = new IntegerParameter(v);
                     if (par == types.Count - 1)
                         outParameter = ip;
-
+                   
                     for (int i = 0; i < selection.GetLength(0); i++)
                     {
                         if (cbInt.SelectedIndex == 0)
@@ -502,6 +502,7 @@ namespace NeuroWnd
                     for (int i = 0; i < selection.GetLength(0); i++)
                         v.Add(selection[i, par]);
                     RealParameter ip = new RealParameter(v);
+                    
                     if (par == types.Count - 1)
                         outParameter = ip;
 

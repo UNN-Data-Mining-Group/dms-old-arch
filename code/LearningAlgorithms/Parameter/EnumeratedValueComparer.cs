@@ -8,6 +8,9 @@ namespace LearningAlgorithms.Parameter
 {
     public class EnumeratedValueComparer: IParameterValueComparer
     {
+        public double ComparingRange { get { return 0; }
+            set { }
+        }
         public EnumeratedValueComparer(EnumeratedParameter par, 
             ParameterValueType t1, ParameterValueType t2)
         {
