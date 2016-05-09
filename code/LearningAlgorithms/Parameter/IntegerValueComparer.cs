@@ -8,7 +8,7 @@ namespace LearningAlgorithms.Parameter
 {
     public class IntegerValueComparer: IParameterValueComparer
     {
-        public int ComparingRange
+        public double ComparingRange
         {
             get { return _comparingRange; }
             set
@@ -64,7 +64,7 @@ namespace LearningAlgorithms.Parameter
             return res;
         }
 
-        private int _comparingRange;
+        private double _comparingRange;
         private readonly ParameterValueType _type1;
         private readonly ParameterValueType _type2;
         private readonly IntegerParameter _parameter;

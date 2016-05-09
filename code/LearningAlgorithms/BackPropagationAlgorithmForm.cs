@@ -34,7 +34,7 @@ namespace LearningAlgorithms
             this.converter = converter;
 
             dataSet = new DataSet();
-            for (int i = 0; i < trainingSet.GetLength(0); i++)
+            /*for (int i = 0; i < trainingSet.GetLength(0); i++)
             {
                 double[] x = new double[trainingSet.GetLength(1) - 1];
                 for (int j = 0; j < x.Length; j++)
@@ -42,7 +42,7 @@ namespace LearningAlgorithms
                     x[j] = trainingSet[i, j];
                 }
                 dataSet.AddSample(x, trainingSet[i, trainingSet.GetLength(1) - 1]);
-            }
+            }*/
 
             InitializeComponent();
 
@@ -64,7 +64,7 @@ namespace LearningAlgorithms
                 double speed = Convert.ToDouble(tbSpeed.Text);
                 double trainPersent = Convert.ToDouble(tbTrainPercent.Text);
 
-                List<int> trainIndexes = new List<int>();
+               /* List<int> trainIndexes = new List<int>();
                 List<int> testIndexes = new List<int>();
 
                 int trainSize = Convert.ToInt32(dataSet.Size*trainPersent);
@@ -84,18 +84,51 @@ namespace LearningAlgorithms
                 {
                     if(!trainIndexes.Contains(i))
                         testIndexes.Add(i);
-                }
+                }*/
 
                 DataSet train = new DataSet();
-                foreach (int sampleIndex in trainIndexes)
-                    train.AddSample(dataSet.GetX(sampleIndex), dataSet.GetY(sampleIndex));
+                /*foreach (int sampleIndex in trainIndexes)
+                    train.AddSample(dataSet.GetX(sampleIndex), dataSet.GetY(sampleIndex));*/
 
                 DataSet test = new DataSet();
-                foreach (int sampleIndex in testIndexes)
-                    test.AddSample(dataSet.GetX(sampleIndex), dataSet.GetY(sampleIndex));
+                /*foreach (int sampleIndex in testIndexes)
+                    test.AddSample(dataSet.GetX(sampleIndex), dataSet.GetY(sampleIndex));*/
 
-                BackPropagationLearner learner = new BackPropagationLearner(neuroNet, train);
-                learner.Speed = speed;
+                using (StreamReader reader = new StreamReader("data.txt"))
+                {
+                    string[] caption = reader.ReadLine().Split(' ');
+                    int trainSize = Convert.ToInt32(caption[0]);
+                    int testSize = Convert.ToInt32(caption[1]);
+                    int instanceSize = Convert.ToInt32(caption[2]);
+
+                    for (int i = 0; i < trainSize; i++)
+                    {
+                        string[] row = reader.ReadLine().Split(' ');
+                        double[] x = new double[instanceSize - 1];
+                        double y;
+                        for (int n = 0; n < instanceSize - 1; n++)
+                            x[n] = Convert.ToDouble(row[n]);
+                        y = Convert.ToDouble(row[instanceSize - 1]);
+
+                        train.AddSample(x, y);
+                        dataSet.AddSample(x, y);
+                    }
+
+                    for (int i = 0; i < testSize; i++)
+                    {
+                        string[] row = reader.ReadLine().Split(' ');
+                        double[] x = new double[instanceSize - 1];
+                        double y;
+                        for (int n = 0; n < instanceSize - 1; n++)
+                            x[n] = Convert.ToDouble(row[n]);
+                        y = Convert.ToDouble(row[instanceSize - 1]);
+
+                        test.AddSample(x, y);
+                        dataSet.AddSample(x, y);
+                    }
+                }
+
+                BackPropagationLearner learner = new BackPropagationLearner(neuroNet, train) {Speed = speed};
 
                 int currentIteration = 0;
                 bool isFirstIteration = true;
@@ -160,13 +193,20 @@ namespace LearningAlgorithms
                 save_result();
                 isLearningCompleted = true;
                 double err = 0.0;
-                using (StreamWriter writer = new StreamWriter("answers.txt"))
+
+                List<double> s = new List<double>();
+                List<double> a = new List<double>();
+                
+                using (StreamWriter writer = new StreamWriter("answersTrain.txt"))
                 {
                     writer.WriteLine("Instance\tActual\tSolved");
-                    for(int i = 0; i < dataSet.Size; i++)
+                    for(int i = 0; i < train.Size; i++)
                     {
-                        double actual = dataSet.GetY(i);
-                        double solved = learner.NeuroNet.get_res(dataSet.GetX(i));
+                        double actual = train.GetY(i);
+                        double solved = learner.NeuroNet.get_res(train.GetX(i));
+
+                        s.Add(solved);
+                        a.Add(actual);
 
                         if (!comparer.isEqual(actual, solved))
                             err++;
@@ -174,9 +214,51 @@ namespace LearningAlgorithms
                         writer.WriteLine("{0}\t{1}\t{2}", (i+1), converter.Get(actual), 
                             converter.Get(solved));
                     }
-                    err /= dataSet.Size;
+                    err /= train.Size;
                     err *= 100;
                     writer.WriteLine("Error: {0} persent", err);
+                }
+
+                using (StreamWriter writer = new StreamWriter("outTrain.txt"))
+                {
+                    for(int i = 0; i < a.Count; i++)
+                    {
+                        writer.WriteLine("{0} {1}", a[i], s[i]);
+                    }
+                }
+
+                a.Clear();
+                s.Clear();
+                err = 0.0;
+
+                using (StreamWriter writer = new StreamWriter("answersTest.txt"))
+                {
+                    writer.WriteLine("Instance\tActual\tSolved");
+                    for (int i = 0; i < test.Size; i++)
+                    {
+                        double actual = test.GetY(i);
+                        double solved = learner.NeuroNet.get_res(test.GetX(i));
+
+                        s.Add(solved);
+                        a.Add(actual);
+
+                        if (!comparer.isEqual(actual, solved))
+                            err++;
+
+                        writer.WriteLine("{0}\t{1}\t{2}", (i + 1), converter.Get(actual),
+                            converter.Get(solved));
+                    }
+                    err /= test.Size;
+                    err *= 100;
+                    writer.WriteLine("Error: {0} persent", err);
+                }
+
+                using (StreamWriter writer = new StreamWriter("outTest.txt"))
+                {
+                    for (int i = 0; i < a.Count; i++)
+                    {
+                        writer.WriteLine("{0} {1}", a[i], s[i]);
+                    }
                 }
             }
             catch (Exception ex)
