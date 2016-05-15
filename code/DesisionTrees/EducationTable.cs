@@ -78,7 +78,51 @@ namespace DesisionTrees
             }
         }
 
-        
+        public void QuickSortByParam(int first, int last, int index_of_param, Parametr param)
+        {
+            if ((param.Type == TypeParametr.Real) || (param.Type == TypeParametr.Int))
+            {
+                int i = first, j = last;
+                var x = Convert.ToDouble(Rows[(first + last) / 2][index_of_param].Value, UsCulture);//  a[(first + last) / 2];
+                do
+                {
+                    while (Convert.ToDouble(Rows[i][index_of_param].Value, UsCulture) < x) i++;
+                    while (Convert.ToDouble(Rows[j][index_of_param].Value, UsCulture) > x) j--;
+
+                    if (i <= j)
+                    {
+                        if (i < j)
+                        {
+                            var temp = Rows[i];
+                            Rows[i] = Rows[j];
+                            Rows[j] = temp;
+                        }
+                        i++;
+                        j--;
+                    }
+                } while (i <= j);
+                if (i < last)
+                    QuickSortByParam(i, last, index_of_param, param);
+                if (first < j)
+                    QuickSortByParam(first, j, index_of_param, param);
+            }
+            else
+            {
+                for (int i = 0; i < Rows.Count; i++)
+                {
+                    for (int j = i + 1; j < Rows.Count; j++)
+                    {
+                        if (String.Compare(Rows.ElementAt(j)[index_of_param].Value, Rows.ElementAt(i)[index_of_param].Value) < 0)
+                        {
+                            var temp = Rows[i];
+                            Rows[i] = Rows[j];
+                            Rows[j] = temp;
+                        }
+                    }
+                }
+
+            }
+        }
         
     }
 }

@@ -21,7 +21,6 @@ namespace DesisionTrees
         private SQLManagerForTrees sqlManager = new SQLManagerForTrees();
         private DataBaseHandler dbHandler;
         private DataContainer<List<string[]>> desTreeInfo;
-        private DataContainer<DataContainer<List<string>>> learningInfo;
         private List<Parametr> arrParams;
         public String newTreeName;
 
@@ -33,7 +32,6 @@ namespace DesisionTrees
         private void LoadInformationForUsingDesTrees()//переделать
         {
             desTreeInfo.Clear();
-            learningInfo.Clear();
             tvTaskSelections.Nodes.Clear();
 
             dgwTrees.Rows.Clear();
@@ -46,12 +44,6 @@ namespace DesisionTrees
                 List<string[]> itemContainer = new List<string[]>();
                 foreach (string name in bf)
                 {
-                    learningInfo.AddData(name, new DataContainer<List<string>>());
-                    foreach (string sel in selections)
-                    {
-                        learningInfo.FindData(name).AddData(sel, dbHandler.SelectLearningStatistics(name, sel));
-                    }
-
                     string[] str = new string[4];
                     string[] wideStr = dbHandler.SelectNeuroNetDefinitionByName(name);
                     str[0] = wideStr[0];
@@ -157,7 +149,7 @@ namespace DesisionTrees
             InitializeComponent();
             dbHandler = new DataBaseHandler();
             desTreeInfo = new DataContainer<List<string[]>>();
-            learningInfo = new DataContainer<DataContainer<List<string>>>();
+           // learningInfo = new DataContainer<DataContainer<List<string>>>();
             LoadInformationForUsingDesTrees();
         }
 
@@ -232,6 +224,38 @@ namespace DesisionTrees
             return newClassInfo;
         }
 
+        public VeryfiedClassInfo[] ClassInfoInit2(EducationTable educationTable)
+        {
+            Parametr sortParameter = sqlManager.GetOneParametrWithRequest("SELECT * FROM PARAM WHERE( NUMBER = '0' AND TASK_ID = (SELECT TASK_ID FROM SELECTION WHERE NAME =  '" + tvTaskSelections.SelectedNode.Text + "'))");
+            List<String> paramValues = new List<String>();
+            
+            //educationTable.BubbleSortByParam(0, sortParameter);
+            educationTable.QuickSortByParam(0, educationTable.Rows.Count - 1, 0, sortParameter);
+            String param = educationTable.Rows[0][0].Value;
+            paramValues.Add(param);
+
+            int number_of_out_par = 1;
+            for (int i = 0; i < educationTable.Rows.Count; i++)
+            {
+                if (param != educationTable.Rows[i][0].Value)
+                {
+                    number_of_out_par++;
+                    param = educationTable.Rows[i][0].Value;
+                    paramValues.Add(param);
+                }
+            }
+
+            VeryfiedClassInfo[] newClassInfo = new VeryfiedClassInfo[number_of_out_par];
+            for (int i = 0; i < number_of_out_par; i++)
+            {
+                newClassInfo[i] = new VeryfiedClassInfo();
+            }
+            for (int i = 0; i < number_of_out_par; i++)
+            {
+                newClassInfo[i].class_name = paramValues[i];
+            }
+            return newClassInfo;
+        }
         
         public double GiniSplitCalc(VeryfiedClassInfo[] leftClassInf, VeryfiedClassInfo[] rightClassInf)
         {
@@ -254,19 +278,19 @@ namespace DesisionTrees
         {
             index_of_parametr = 0;
             best_value_for_split = "";
-            VeryfiedClassInfo[] leftClassInf = ClassInfoInit();
-            VeryfiedClassInfo[] rightClassInf = ClassInfoInit();
+            VeryfiedClassInfo[] leftClassInf = ClassInfoInit();//ClassInfoInit2(education_table);
+            VeryfiedClassInfo[] rightClassInf = ClassInfoInit();//ClassInfoInit2(education_table);
             Parametr param;
             double giniValue = -100000;
             for(int index = 1; index < education_table.ParameterCount; index++)
             {
                 param = sqlManager.GetOneParametrWithRequest("SELECT * FROM PARAM WHERE ID ='" + education_table.Rows.ElementAt(1)[index].ParametrID + "'");
-                education_table.BubbleSortByParam(index, param);
-                
+                //education_table.BubbleSortByParam(index, param);
+                education_table.QuickSortByParam(0, education_table.Rows.Count - 1, index, param);
                 if ((param.Type == TypeParametr.Real) || (param.Type == TypeParametr.Int))
                 {
                     double average = 0;
-                    for (int prevRowInd = 1, nextRowInd = 2; nextRowInd < education_table.Rows.Count; prevRowInd++, nextRowInd++)
+                    for (int prevRowInd = 0, nextRowInd = 1; nextRowInd < education_table.Rows.Count; prevRowInd++, nextRowInd++)
                     {
                         average = (Convert.ToDouble(education_table.Rows.ElementAt(prevRowInd)[index].Value, UsCulture) + Convert.ToDouble(education_table.Rows.ElementAt(nextRowInd)[index].Value, UsCulture)) / 2.0;
                         for (int i = 0; i < education_table.Rows.Count; i++)
@@ -415,7 +439,7 @@ namespace DesisionTrees
 
         public void treeBuilding(EducationTable education_table, TreeNode tree_node)
         {
-            VeryfiedClassInfo[] thisClassInfo = ClassInfoInit();
+            VeryfiedClassInfo[] thisClassInfo = ClassInfoInit();//ClassInfoInit2(education_table);
             for (int i = 0; i < education_table.Rows.Count; i++)
             {
                 foreach (VeryfiedClassInfo clinf in thisClassInfo)
@@ -567,5 +591,169 @@ namespace DesisionTrees
             TreeUsingForm treeUsingFrm = new TreeUsingForm(arrParams,usedTreeRootID);
             treeUsingFrm.Show();
         }
+
+        private void btnTest_Click(object sender, EventArgs e)
+        {
+
+            Selection selection = sqlManager.GetOneSelectionWithRequest("SELECT * FROM SELECTION WHERE NAME ='" + tvTaskSelections.SelectedNode.Text + "'");
+            arrParams = sqlManager.GetParamsWithRequest("SELECT * FROM PARAM WHERE TASK_ID = (SELECT TASK_ID FROM SELECTION WHERE NAME =  '" + tvTaskSelections.SelectedNode.Text + "')");
+            List<ValueParametr> arrValues = sqlManager.GetValuesWithRequest("select * from VALUE_PARAM where SELECTION_ID=(select ID from SELECTION where NAME ='" + tvTaskSelections.SelectedNode.Text + "')");
+            List<ValueParametr> learningSelection = new List<ValueParametr>();
+            List<ValueParametr> testSelection = new List<ValueParametr>();
+
+            //int k = 0, m = 0;
+            //for (int i = 0; i < arrValues.Count; i++)
+            //{
+            //    if (k == 5)
+            //    {
+            //        testSelection.Add(arrValues[i]);
+            //    }
+            //    else
+            //    {
+            //        learningSelection.Add(arrValues[i]);
+            //    }
+            //    m++;
+            //    if (m == arrParams.Count)
+            //    {
+            //        if (k == 5)
+            //        {
+            //            k = 0;
+            //        }
+            //        k++;
+            //        m = 0;                    
+            //    }
+            //}
+
+            EducationTable educatTable = new EducationTable(arrValues, arrParams);
+            EducationTable testTable = new EducationTable();
+            TreeNode root = new TreeNode();
+            int root_id = 1 + sqlManager.GetMaxFeature("SELECT COUNT(1) FROM NODE", "COUNT(1)");
+
+            for (int i = 0; i < educatTable.Rows.Count; i++)
+            {
+                var tmp = educatTable.Rows[i];
+                for (int j = i + 1; j < educatTable.Rows.Count; j++)
+                {
+                    bool flag = true;
+                    for (int j1 = 1; j1 < educatTable.Rows[j].Length; j1++)
+                    {
+                        if (tmp[j1].Value != educatTable.Rows[j][j1].Value)
+                        {
+                            flag = false;
+                        }
+                    }
+                    if (flag == true)
+                    {
+                        educatTable.Rows.RemoveAt(j);
+                    }
+                }
+            }
+            for (int i = 0; i < educatTable.Rows.Count; i++)
+            {
+                var tmp = educatTable.Rows[i];
+                for (int j = i + 1; j < educatTable.Rows.Count; j++)
+                {
+                    bool flag = true;
+                    for (int j1 = 1; j1 < educatTable.Rows[j].Length; j1++)
+                    {
+                        if (tmp[j1].Value != educatTable.Rows[j][j1].Value)
+                        {
+                            flag = false;
+                        }
+                    }
+                    if (flag == true)
+                    {
+                        educatTable.Rows.RemoveAt(j);
+                    }
+                }
+            }
+            int k = 0;
+            for (int i = 0; i < educatTable.Rows.Count; i++)
+            {
+                if (k == 4)
+                {
+                    k = 0;
+                    testTable.Rows.Add(educatTable.Rows[i]);
+                    educatTable.Rows.RemoveAt(i);
+                }
+                k++;
+            }
+
+
+                //VeryfiedClassInfo[] ClassInf = ClassInfoInit2(educatTable);
+                //String str = "";
+                //for (int i = 0; i < ClassInf.Length; i++)
+                //{
+                //    str += ClassInf[i].class_name.ToString() + '|';
+                //}
+
+                treeBuilding(educatTable, root);
+
+            double learningMistake = 0;
+            int testMistake = 0;
+            String answer = "";
+            String[] input_row = new String[arrParams.Count - 1];
+            for (int i = 0; i < educatTable.Rows.Count; i++)
+            {                
+                for (int j = 0; j < arrParams.Count-1; j++)
+                {
+                    input_row[j] = educatTable.Rows[i][j+1].Value.ToString(); //dgwInputVal.Rows[0].Cells[i].Value.ToString();
+                }
+                answer = TreeUsing(input_row, root,arrParams);
+                if (answer == educatTable.Rows[i][0].Value.ToString())
+                {
+                    learningMistake = learningMistake + 1;
+                }
+            }
+            learningMistake = 100 - 100 * learningMistake / educatTable.Rows.Count;
+
+            for (int i = 0; i < testTable.Rows.Count; i++)
+            {
+                for (int j = 0; j < arrParams.Count - 1; j++)
+                {
+                    input_row[j] = testTable.Rows[i][j + 1].Value.ToString(); //dgwInputVal.Rows[0].Cells[i].Value.ToString();
+                }
+                answer = TreeUsing(input_row, root, arrParams);
+                if (answer == testTable.Rows[i][0].Value.ToString())
+                {
+                    testMistake = testMistake + 1;
+                }
+            }
+            testMistake = 100 - 100 * testMistake / testTable.Rows.Count;
+            lblTestResult.Text = "test = "+ testMistake + "  learn = " + learningMistake;
+
+        }
+
+        public String TreeUsing(String[] param_row, TreeNode curNode, List<Parametr> arr_Params)
+        {
+            while (curNode.is_leaf != true)
+            {
+
+                if ((arr_Params[curNode.rule.index_of_param - 1].Type == TypeParametr.Real) || (arr_Params[curNode.rule.index_of_param - 1].Type == TypeParametr.Int))
+                {
+                    if (Convert.ToDouble(param_row[curNode.rule.index_of_param - 1], UsCulture) <= Convert.ToDouble(curNode.rule.value, UsCulture))
+                    {
+                        curNode = curNode.right_child;
+                    }
+                    else
+                    {
+                        curNode = curNode.left_child;
+                    }
+                }
+                else
+                {
+                    if (param_row[curNode.rule.index_of_param - 1] == curNode.rule.value)
+                    {
+                        curNode = curNode.right_child;
+                    }
+                    else
+                    {
+                        curNode = curNode.left_child;
+                    }
+                }
+            }
+            return curNode.rule.value;
+        }
+        
     }
 }
