@@ -31,6 +31,8 @@
             this.gbTasksTree = new System.Windows.Forms.GroupBox();
             this.tvTaskSelections = new System.Windows.Forms.TreeView();
             this.gbUsingDesTrees = new System.Windows.Forms.GroupBox();
+            this.lblTestResult = new System.Windows.Forms.Label();
+            this.btnTest = new System.Windows.Forms.Button();
             this.btnBuildTree = new System.Windows.Forms.Button();
             this.lbTreeSelected = new System.Windows.Forms.Label();
             this.lbTreeInfo = new System.Windows.Forms.Label();
@@ -73,6 +75,8 @@
             this.gbUsingDesTrees.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbUsingDesTrees.Controls.Add(this.lblTestResult);
+            this.gbUsingDesTrees.Controls.Add(this.btnTest);
             this.gbUsingDesTrees.Controls.Add(this.btnBuildTree);
             this.gbUsingDesTrees.Controls.Add(this.lbTreeSelected);
             this.gbUsingDesTrees.Controls.Add(this.lbTreeInfo);
@@ -89,6 +93,29 @@
             this.gbUsingDesTrees.TabIndex = 9;
             this.gbUsingDesTrees.TabStop = false;
             this.gbUsingDesTrees.Text = "Деревья решений";
+            // 
+            // lblTestResult
+            // 
+            this.lblTestResult.AutoSize = true;
+            this.lblTestResult.Font = new System.Drawing.Font("Book Antiqua", 14F);
+            this.lblTestResult.Location = new System.Drawing.Point(303, 86);
+            this.lblTestResult.Name = "lblTestResult";
+            this.lblTestResult.Size = new System.Drawing.Size(111, 23);
+            this.lblTestResult.TabIndex = 20;
+            this.lblTestResult.Text = "Результаты";
+            this.lblTestResult.Visible = false;
+            // 
+            // btnTest
+            // 
+            this.btnTest.Enabled = false;
+            this.btnTest.Location = new System.Drawing.Point(510, 81);
+            this.btnTest.Name = "btnTest";
+            this.btnTest.Size = new System.Drawing.Size(134, 39);
+            this.btnTest.TabIndex = 19;
+            this.btnTest.Text = "Тест";
+            this.btnTest.UseVisualStyleBackColor = true;
+            this.btnTest.Visible = false;
+            this.btnTest.Click += new System.EventHandler(this.btnTest_Click);
             // 
             // btnBuildTree
             // 
@@ -225,6 +252,8 @@
         private System.Windows.Forms.Button btnUse;
         private System.Windows.Forms.DataGridView dgwTrees;
         private System.Windows.Forms.Button btnBuildTree;
+        private System.Windows.Forms.Label lblTestResult;
+        private System.Windows.Forms.Button btnTest;
 
     }
 }
