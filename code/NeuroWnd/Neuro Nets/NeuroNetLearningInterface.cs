@@ -22,7 +22,7 @@ namespace NeuroWnd.Neuro_Nets
         public int CountOutputNeurons { get { return learned_net.OutputNeuronsCount; } }
         public double[] GetOutputsOfAllNeurons(double[] x)
         {
-            learned_net.MakeAnswer(x);
+            learned_net.Solve(x);
             double[] res = new double[learned_net.NeuronsCount];
             for (int i = 0; i < learned_net.NeuronsCount; i++)
             {
@@ -81,7 +81,7 @@ namespace NeuroWnd.Neuro_Nets
         }
         public double get_res(double[] X)
         {
-            return learned_net.MakeAnswer(X)[0];
+            return learned_net.Solve(X)[0];
         }
         public INeuroNetLearning copy()
         {

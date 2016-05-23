@@ -41,6 +41,8 @@
             this.btnWriteResult = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.tbMinTestAcc = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.tbSeed = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // btnLearn
@@ -90,7 +92,7 @@
             // lbTestError
             // 
             this.lbTestError.AutoSize = true;
-            this.lbTestError.Location = new System.Drawing.Point(12, 139);
+            this.lbTestError.Location = new System.Drawing.Point(12, 166);
             this.lbTestError.Name = "lbTestError";
             this.lbTestError.Size = new System.Drawing.Size(35, 13);
             this.lbTestError.TabIndex = 5;
@@ -99,7 +101,7 @@
             // lbTrainError
             // 
             this.lbTrainError.AutoSize = true;
-            this.lbTrainError.Location = new System.Drawing.Point(12, 164);
+            this.lbTrainError.Location = new System.Drawing.Point(12, 191);
             this.lbTrainError.Name = "lbTrainError";
             this.lbTrainError.Size = new System.Drawing.Size(35, 13);
             this.lbTrainError.TabIndex = 6;
@@ -125,7 +127,7 @@
             // lbCurrentIter
             // 
             this.lbCurrentIter.AutoSize = true;
-            this.lbCurrentIter.Location = new System.Drawing.Point(12, 189);
+            this.lbCurrentIter.Location = new System.Drawing.Point(12, 216);
             this.lbCurrentIter.Name = "lbCurrentIter";
             this.lbCurrentIter.Size = new System.Drawing.Size(35, 13);
             this.lbCurrentIter.TabIndex = 9;
@@ -144,7 +146,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 93);
+            this.label1.Location = new System.Drawing.Point(12, 119);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(188, 13);
             this.label1.TabIndex = 12;
@@ -152,17 +154,36 @@
             // 
             // tbMinTestAcc
             // 
-            this.tbMinTestAcc.Location = new System.Drawing.Point(206, 90);
+            this.tbMinTestAcc.Location = new System.Drawing.Point(206, 116);
             this.tbMinTestAcc.Name = "tbMinTestAcc";
             this.tbMinTestAcc.Size = new System.Drawing.Size(61, 20);
             this.tbMinTestAcc.TabIndex = 11;
             this.tbMinTestAcc.Text = "90";
             // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(12, 93);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(133, 13);
+            this.label2.TabIndex = 13;
+            this.label2.Text = "Сид разбиения выборки:";
+            // 
+            // tbSeed
+            // 
+            this.tbSeed.Location = new System.Drawing.Point(151, 90);
+            this.tbSeed.Name = "tbSeed";
+            this.tbSeed.Size = new System.Drawing.Size(116, 20);
+            this.tbSeed.TabIndex = 14;
+            this.tbSeed.Text = "13052016";
+            // 
             // BackPropagationAlgorithmForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(398, 218);
+            this.ClientSize = new System.Drawing.Size(398, 242);
+            this.Controls.Add(this.tbSeed);
+            this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.tbMinTestAcc);
             this.Controls.Add(this.btnWriteResult);
@@ -203,5 +224,7 @@
         private System.Windows.Forms.Button btnWriteResult;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox tbMinTestAcc;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox tbSeed;
     }
 }

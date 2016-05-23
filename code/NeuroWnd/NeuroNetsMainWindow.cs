@@ -430,7 +430,129 @@ namespace NeuroWnd
             int[] neuronsInLayers = dbHandler.SelectNeuronsInLayers(lbNetSelected.Text);
             NeuroNet net = new NeuroNet(countInputNeurons, countOutputNeurons, neuronsInLayers, connections, weights, af);
 
-            NeuroNetSolvingWindow solvingWnd = new NeuroNetSolvingWindow(net);
+            string[,] selection = dbHandler.SelectLearningSelection(lbTaskSelected.Text, lbSelSelected.Text);
+            List<string> types = dbHandler.GetParameterTypesOfSelection(lbTaskSelected.Text);
+            List<string> names = dbHandler.GetParameterNamesOfSelection(lbTaskSelected.Text);
+
+            List<IParameter> pars = new List<IParameter>();
+            double[,] convertedSelection = new double[selection.GetLength(0), selection.GetLength(1)];
+            for (int par = 0; par < types.Count; par++)
+            {
+                if (types[par].Equals("Int"))
+                {
+                    List<string> v = new List<string>();
+                    for (int i = 0; i < selection.GetLength(0); i++)
+                        v.Add(selection[i, par]);
+                    IntegerParameter ip = new IntegerParameter(v);
+                    pars.Add(ip);
+
+                    for (int i = 0; i < selection.GetLength(0); i++)
+                    {
+                        if (cbInt.SelectedIndex == 0)
+                            convertedSelection[i, par] = Convert.ToDouble(ip.GetInt(selection[i, par]));
+                        else if (cbInt.SelectedIndex == 1)
+                            convertedSelection[i, par] = Convert.ToDouble(ip.GetNormalizedInt(selection[i, par]));
+                        else if (cbInt.SelectedIndex == 2)
+                            convertedSelection[i, par] = Convert.ToDouble(ip.GetNormalizedDouble(selection[i, par]));
+                    }
+                }
+                else if (types[par].Equals("Real"))
+                {
+                    List<string> v = new List<string>();
+                    for (int i = 0; i < selection.GetLength(0); i++)
+                        v.Add(selection[i, par]);
+                    RealParameter ip = new RealParameter(v);
+
+                    pars.Add(ip);
+
+                    for (int i = 0; i < selection.GetLength(0); i++)
+                    {
+                        if (cbReal.SelectedIndex == 0)
+                            convertedSelection[i, par] = Convert.ToDouble(ip.GetDouble(selection[i, par]));
+                        else if (cbReal.SelectedIndex == 1)
+                            convertedSelection[i, par] = Convert.ToDouble(ip.GetNormalizedInt(selection[i, par]));
+                        else if (cbReal.SelectedIndex == 2)
+                            convertedSelection[i, par] = Convert.ToDouble(ip.GetNormalizedDouble(selection[i, par]));
+                    }
+                }
+                else if ((types[par].Equals("Enum")))
+                {
+                    List<string> v = new List<string>();
+                    for (int i = 0; i < selection.GetLength(0); i++)
+                        v.Add(selection[i, par]);
+                    EnumeratedParameter ip = new EnumeratedParameter(v);
+                    pars.Add(ip);
+
+                    for (int i = 0; i < selection.GetLength(0); i++)
+                    {
+                        if (cbEnum.SelectedIndex == 0)
+                            convertedSelection[i, par] = Convert.ToDouble(ip.GetInt(selection[i, par]));
+                        else if (cbEnum.SelectedIndex == 1)
+                            convertedSelection[i, par] = Convert.ToDouble(ip.GetNormalizedInt(selection[i, par]));
+                        else if (cbEnum.SelectedIndex == 2)
+                            convertedSelection[i, par] = Convert.ToDouble(ip.GetNormalizedDouble(selection[i, par]));
+                    }
+                }
+            }
+
+            List<IParameterValueConverter> converters = new List<IParameterValueConverter>();
+
+            for (int i = 0; i < types.Count; i++)
+            {
+                if (types[i] == "Real")
+                {
+                    ParameterValueType type = ParameterValueType.String;
+                    switch (cbReal.SelectedIndex)
+                    {
+                        case 0:
+                            type = ParameterValueType.Real;
+                            break;
+                        case 1:
+                            type = ParameterValueType.NormalisedInteger;
+                            break;
+                        case 2:
+                            type = ParameterValueType.NormalisedReal;
+                            break;
+                    }
+                    converters.Add(new RealParameterConverter(type, (RealParameter) pars[i]));
+                }
+                else if (types[i] == "Int")
+                {
+                    ParameterValueType type = ParameterValueType.String;
+                    switch (cbInt.SelectedIndex)
+                    {
+                        case 0:
+                            type = ParameterValueType.Integer;
+                            break;
+                        case 1:
+                            type = ParameterValueType.NormalisedInteger;
+                            break;
+                        case 2:
+                            type = ParameterValueType.NormalisedReal;
+                            break;
+                    }
+                    converters.Add(new IntegerParameterConverter(type, (IntegerParameter) pars[i]));
+                }
+                else if (types[i] == "Enum")
+                {
+                    ParameterValueType type = ParameterValueType.String;
+                    switch (cbEnum.SelectedIndex)
+                    {
+                        case 0:
+                            type = ParameterValueType.Integer;
+                            break;
+                        case 1:
+                            type = ParameterValueType.NormalisedInteger;
+                            break;
+                        case 2:
+                            type = ParameterValueType.NormalisedReal;
+                            break;
+                    }
+                    converters.Add(new EnumeratedParameterConverter(type, (EnumeratedParameter) pars[i]));
+                }
+            }
+
+            NeuroNetSolvingWindow solvingWnd = new NeuroNetSolvingWindow(net, convertedSelection, converters, names);
             solvingWnd.Show();
         }
 
@@ -621,43 +743,6 @@ namespace NeuroWnd
                 "Удаление обученных весов из БД");
             }
             LoadInformationForUsingNeuroNets();
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            /*Perceptron pc = new Perceptron();
-            int[] neurs = {2, 9, 1};
-            bool[,] top = pc.CreateNet(12, 3, neurs);
-            double[,] weights = new double[12,12];
-            LinearActivateFunction af = new LinearActivateFunction();
-            af.SetValueOfParameter("w0", -20.0);
-            af.SetValueOfParameter("minVal", -2.0);
-            af.SetValueOfParameter("maxVal", 2.0);
-            af.SetValueOfParameter("speed", 0.1);
-
-            NeuroNet nn = new NeuroNet(2, 1, neurs, top, weights, af);
-            NeuroNetLearningInterface nni = new NeuroNetLearningInterface(nn, "test", null, null);
-
-            int N = 101;
-            double[,] selection = new double[N*N, 3];
-            for (int i = 0; i < N; i++)
-            {
-                for (int j = 0; j < N; j++)
-                {
-                    double x = Convert.ToDouble(i) / (N - 1);
-                    double y = Convert.ToDouble(j) / (N - 1);
-
-                    selection[i * N + j, 0] = x;
-                    selection[i * N + j, 1] = y;
-                    selection[i * N + j, 2] = x + y;
-                }
-            }
-
-            GeneticAlgorithmForm ga = new GeneticAlgorithmForm(nni, selection);
-            ga.ShowDialog();
-
-            NeuroNetSolvingWindow solvingWnd = new NeuroNetSolvingWindow(nn);
-            solvingWnd.Show();*/
         }
     }
 }

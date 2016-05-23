@@ -38,8 +38,7 @@ namespace NeuroWnd.Parameter
         public string GetFromNormalized(double value)
         {
             double step = 1.0 / (2 * countClasses);
-            /*if (value <= 0.0 || value >= 1.0)
-                throw new ArgumentOutOfRangeException();*/
+
             if (value <= 0.0)
                 value = step;
             else if (value >= 1.0)
@@ -52,8 +51,6 @@ namespace NeuroWnd.Parameter
 
         public string Get(int value)
         {
-            /*if (value < 0 || value > classes.Count)
-                throw new ArgumentOutOfRangeException();*/
             if (value < 0)
                 value = 0;
             else if (value > classes.Count - 1)

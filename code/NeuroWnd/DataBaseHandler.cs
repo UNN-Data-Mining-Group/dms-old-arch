@@ -20,6 +20,41 @@ namespace NeuroWnd
             connector = new SQLiteConnector();
         }
 
+        public List<string> GetParameterNamesOfSelection(String TaskName)
+        {
+            List<string> res = new List<string>();
+            connector.ConnectToDB();
+            SQLiteCommand cmd = new SQLiteCommand(connector.connection);
+            cmd.CommandText = "SELECT ID FROM TASK WHERE NAME='" + TaskName + "'";
+            int taskID = Convert.ToInt32(cmd.ExecuteScalar());
+
+            cmd.CommandText = "SELECT NAME FROM PARAM WHERE TASK_ID=" + taskID;
+            SQLiteDataReader reader = cmd.ExecuteReader();
+            try
+            {
+                while (reader.Read())
+                {
+                    res.Add(reader[0].ToString());
+                }
+            }
+            catch (SQLiteException ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+            reader.Close();
+            connector.DisconnectFromDB();
+
+            string outType = res[0];
+            for (int i = 1; i < res.Count; i++)
+            {
+                res[i - 1] = res[i];
+            }
+            res[res.Count - 1] = outType;
+
+            return res;
+        }
+
         public List<string> GetParameterTypesOfSelection(String TaskName)
         {
             List<string> res = new List<string>();

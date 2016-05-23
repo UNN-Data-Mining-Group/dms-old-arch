@@ -256,7 +256,12 @@ namespace NeuroWnd.Neuro_Nets
             ResetNeuroNet();
         }
 
-        public double[] MakeStep(double[] inputs)
+        public double[] Solve(double[] inputs)
+        {
+            return MakeAnswer(inputs);
+        }
+
+        private double[] MakeStep(double[] inputs)
         {
             isIterationsFinished = false;
             isWaveCameToOutputNeuron = false;
@@ -377,7 +382,7 @@ namespace NeuroWnd.Neuro_Nets
             }
             return outputs;
         }
-        public double[] MakeIteration(double[] inputs)
+        private double[] MakeIteration(double[] inputs)
         {
             double[] res = MakeStep(inputs);
 
@@ -386,7 +391,7 @@ namespace NeuroWnd.Neuro_Nets
 
             return res;
         }
-        public double[] MakeAnswer(double[] inputs, double eps = 1E-16)
+        private double[] MakeAnswer(double[] inputs, double eps = 1E-16)
         {
             ResetNeuroNet();
             double[] res = MakeIteration(inputs);
