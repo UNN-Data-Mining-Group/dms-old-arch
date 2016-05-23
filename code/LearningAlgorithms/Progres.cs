@@ -27,6 +27,12 @@ namespace LearningAlgorithms
         {
             return label2;
         }
+
+        public Label get_lb3()
+        {
+            return label3;
+        }
+
         public void start(Stopwatch st, int step)
         {
             long i = st.Elapsed.Ticks;

@@ -11,6 +11,79 @@ using LearningAlgorithms.Parameter;
 
 namespace LearningAlgorithms
 {
+    public class Table
+    {
+        int seed = 13052016;
+        int training_size, test_size;
+        double train_persent = 8.0 / 10.0;
+        double[,] training_set, test_set;
+        public void create_table(double[,] training_set_)
+        {
+            Random rand = new Random(seed);
+            int tmp;           
+            
+            bool[] is_added = new bool[training_set_.GetLength(0)];
+            for (int i = 0; i < training_set_.GetLength(0); i++)
+            {
+                is_added[i] = false;
+            }
+            training_size = Convert.ToInt32(Convert.ToDouble(training_set_.GetLength(0)) * train_persent);
+            test_size = training_set_.GetLength(0) - training_size;
+            training_set = new double[training_size, training_set_.GetLength(1)];
+            test_set = new double[test_size, training_set_.GetLength(1)];
+            for (int i = 0; i < training_size; )
+            {
+                tmp = rand.Next(0, training_set_.GetLength(0));
+                if (!is_added[tmp])
+                {
+                    is_added[tmp] = true;
+
+                    for (int j = 0; j < training_set.GetLength(1); j++)
+                        training_set[i, j] = training_set_[tmp, j];
+                    i++;
+                }
+            }
+            tmp = 0;
+            for (int i = 0; i < training_set_.GetLength(0); i++)
+            {
+                if (!is_added[i])
+                {
+                    for (int j = 0; j < test_set.GetLength(1); j++)
+                        test_set[tmp, j] = training_set_[i, j];
+                    tmp++;
+                }
+            }
+            save_result();
+        }
+        public void save_result()
+        {
+            string name ="test\\" + (test_set.GetLength(0) + training_set.GetLength(0)).ToString() + ".txt";
+            using (System.IO.StreamWriter stream = new System.IO.StreamWriter(name))
+            {
+                stream.Write("{0} ", training_set.GetLength(0));
+                stream.Write("{0} ", test_set.GetLength(0));
+                stream.Write("{0} ", test_set.GetLength(1));
+                stream.WriteLine();
+                for (int i = 0; i < training_set.GetLength(0); i++)
+                {
+                    for (int j = 0; j < training_set.GetLength(1); j++)
+                    {
+                        stream.Write("{0} ", training_set[i, j]);
+                    }
+                    stream.WriteLine();
+                }
+                for (int i = 0; i < test_set.GetLength(0); i++)
+                {
+                    for (int j = 0; j < test_set.GetLength(1); j++)
+                    {
+                        stream.Write("{0} ", test_set[i, j]);
+                    }
+                    stream.WriteLine();
+                }
+            }
+
+        }
+    }
     public partial class GeneticAlgorithmForm : Form
     {
         INeuroNetLearning solver;
@@ -29,6 +102,7 @@ namespace LearningAlgorithms
             gen = new GeneticAlgorithm();
             solver = solver_;
             all_set = training_set_;
+           // new Table().create_table(training_set_);
         }
         
         private void BT_learn_Click(object sender, EventArgs e)
@@ -108,7 +182,7 @@ namespace LearningAlgorithms
 
         private void parser(double[,] training_set_)
         {
-            Random rand = new Random();
+            Random rand = new Random(13052016);
             int tmp;
             double max,min;
             max = min = training_set_[0,training_set_.GetLength(1) - 1];
