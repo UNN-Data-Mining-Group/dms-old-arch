@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-
+using LearningAlgorithms.Parameter;
 using NeuroWnd.Neuro_Nets;
 
 namespace NeuroWnd
@@ -14,73 +15,117 @@ namespace NeuroWnd
     public partial class NeuroNetSolvingWindow : Form
     {
         private NeuroNet currentNet;
-        private List<Tuple<Label, TextBox>> inputs;
-        private List<Tuple<Label, TextBox>> outputs;
+        private List<IParameterValueConverter> converters;
+        private double[,] selection;
+        private List<string> names;
+        private List<string[]> solved;
 
-        public NeuroNetSolvingWindow(NeuroNet net)
+        public NeuroNetSolvingWindow(NeuroNet net, double[,] convertedSelection, List<IParameterValueConverter> converters, List<string> names)
         {
             InitializeComponent();
 
             currentNet = net;
+            selection = convertedSelection;
+            this.converters = converters;
+            this.names = names;
+        }
 
-            inputs = new List<Tuple<Label, TextBox>>();
-            outputs = new List<Tuple<Label, TextBox>>();
-            for (int i = 0; i < net.InputNeuronsCount; i++)
+        private void solve(object sender, DoWorkEventArgs doWorkEventArgs)
+        {
+            int percentage = 0;
+
+            solved = new List<string[]>();
+
+            for (int i = 0; i < selection.GetLength(0); i++)
             {
-                Label lb = new Label();
-                lb.Text = "x[" + i + "]=";
-                lb.Location = new Point(15, 17 + i * 25);
-                lb.Size = new Size(lb.Text.Length * 8, 20);
-                gbInputs.Controls.Add(lb);
+                double[] curX = new double[selection.GetLength(1) - 1];
+                double[] curY = new double[1];
 
-                TextBox tb = new TextBox();
-                tb.Text = "0,0";
-                tb.Location = new Point(lb.Text.Length * 10 + 5, 15 + i * 25);
-                tb.Size = new Size(100, 20);
-                gbInputs.Controls.Add(tb);
+                for (int j = 0; j < selection.GetLength(1) - 1; j++)
+                {
+                    curX[j] = selection[i, j];
+                }
 
-                inputs.Add(new Tuple<Label, TextBox>(lb, tb));
-            }
-            for (int i = 0; i < net.OutputNeuronsCount; i++)
-            {
-                Label lb = new Label();
-                lb.Text = "y[" + i + "]=";
-                lb.Location = new Point(15, 17 + i * 25);
-                lb.Size = new Size(lb.Text.Length * 8, 20);
-                gbOutputs.Controls.Add(lb);
+                curY = currentNet.Solve(curX);
 
-                TextBox tb = new TextBox();
-                tb.Text = "0,0";
-                tb.Location = new Point(lb.Text.Length * 10 + 5, 15 + i * 25);
-                tb.Size = new Size(100, 20);
-                gbOutputs.Controls.Add(tb);
+                string[] res = new string[selection.GetLength(1) + 1];
 
-                outputs.Add(new Tuple<Label, TextBox>(lb, tb));
+                res[0] = (i+1).ToString();
+                int lastInd = selection.GetLength(1) - 1;
+                for (int j = 0; j < lastInd; j++)
+                {
+                    res[j + 1] = converters[j].Get(curX[j]);
+                }
+                res[lastInd + 1] = converters[lastInd].Get(curY[0]);
+
+                solved.Add(res);
+
+                ((BackgroundWorker)sender).ReportProgress(100 * i / selection.GetLength(0));
             }
         }
 
-        private void btnSolve_Click(object sender, EventArgs e)
+        private void btnWrite_Click(object sender, EventArgs e)
         {
-            double[] input = new double[currentNet.InputNeuronsCount];
-            double[] output = new double[currentNet.OutputNeuronsCount];
+            saveFileDialog1.ShowDialog();
 
-            try
+            if (saveFileDialog1.FileName != string.Empty)
             {
-
-                for (int i = 0; i < currentNet.InputNeuronsCount; i++)
+                using (StreamWriter writer = new StreamWriter(saveFileDialog1.OpenFile()))
                 {
-                    input[i] = Convert.ToDouble(inputs[i].Item2.Text);
-                }
-                output = currentNet.MakeAnswer(input);
-                for (int i = 0; i < currentNet.OutputNeuronsCount; i++)
-                {
-                    outputs[i].Item2.Text = Convert.ToString(output[i]);
+                    for (int i = 0; i < selection.GetLength(0); i++)
+                    {
+                        for (int j = 0; j <= selection.GetLength(1); j++)
+                        {
+                            writer.Write(solved[i][j] + "\t");
+                        }
+                        writer.Write('\n');
+                    }
                 }
             }
-            catch(Exception ex)
+        }
+
+        private void start()
+        {
+            lbSolveStatus.Text = "Идет решение...";
+            btnWrite.Enabled = false;
+            dataGridView1.Rows.Clear();
+
+            dataGridView1.Columns.Add("number", "Номер");
+            for (int i = 0; i < selection.GetLength(1); i++)
             {
-                MessageBox.Show(ex.Message);
+                dataGridView1.Columns.Add(i.ToString(), names[i]);
             }
+
+            BackgroundWorker w = new BackgroundWorker();
+            w.WorkerReportsProgress = true;
+            w.WorkerSupportsCancellation = false;
+            w.DoWork += solve;
+            w.ProgressChanged += showProgress;
+            w.RunWorkerCompleted += done;
+
+            w.RunWorkerAsync();
+        }
+
+        private void done(object sender, RunWorkerCompletedEventArgs e)
+        {
+            for (int i = 0; i < selection.GetLength(0); i++)
+            {
+                dataGridView1.Rows.Add(solved[i]);
+            }
+
+            lbSolveStatus.Text = "Решено";
+            btnWrite.Enabled = true;
+            progressBar1.Value = 100;
+        }
+
+        private void showProgress(object sender, ProgressChangedEventArgs e)
+        {
+            progressBar1.Value = e.ProgressPercentage;
+        }
+
+        private void NeuroNetSolvingWindow_Shown(object sender, EventArgs e)
+        {
+            start();
         }
     }
 }

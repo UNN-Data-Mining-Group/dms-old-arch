@@ -54,9 +54,6 @@ namespace NeuroWnd.Parameter
 
         public string GetFromNormalized(double value)
         {
-            /*if (value < 0.0 || value > 1.0)
-                throw new ArgumentOutOfRangeException();*/
-
             if (value < 0.0)
                 value = 0.0;
             else if (value > 1.0)
@@ -68,8 +65,6 @@ namespace NeuroWnd.Parameter
 
         public string Get(double value)
         {
-            /*if (value < minValue || value > maxValue)
-                throw new ArgumentOutOfRangeException();*/
             return Convert.ToString(value);
         }
 

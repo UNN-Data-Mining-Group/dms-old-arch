@@ -34,7 +34,7 @@ namespace LearningAlgorithms
             this.converter = converter;
 
             dataSet = new DataSet();
-            /*for (int i = 0; i < trainingSet.GetLength(0); i++)
+            for (int i = 0; i < trainingSet.GetLength(0); i++)
             {
                 double[] x = new double[trainingSet.GetLength(1) - 1];
                 for (int j = 0; j < x.Length; j++)
@@ -42,7 +42,7 @@ namespace LearningAlgorithms
                     x[j] = trainingSet[i, j];
                 }
                 dataSet.AddSample(x, trainingSet[i, trainingSet.GetLength(1) - 1]);
-            }*/
+            }
 
             InitializeComponent();
 
@@ -63,12 +63,13 @@ namespace LearningAlgorithms
                 int iterations = Convert.ToInt32(tbIterationNumber.Text);
                 double speed = Convert.ToDouble(tbSpeed.Text);
                 double trainPersent = Convert.ToDouble(tbTrainPercent.Text);
+                int seed = Convert.ToInt32(tbSeed.Text);
 
-               /* List<int> trainIndexes = new List<int>();
+                List<int> trainIndexes = new List<int>();
                 List<int> testIndexes = new List<int>();
 
                 int trainSize = Convert.ToInt32(dataSet.Size*trainPersent);
-                Random rnd = new Random();
+                Random rnd = new Random(seed);
 
                 for (int i = 0; i < trainSize; i++)
                 {
@@ -84,49 +85,15 @@ namespace LearningAlgorithms
                 {
                     if(!trainIndexes.Contains(i))
                         testIndexes.Add(i);
-                }*/
+                }
 
                 DataSet train = new DataSet();
-                /*foreach (int sampleIndex in trainIndexes)
-                    train.AddSample(dataSet.GetX(sampleIndex), dataSet.GetY(sampleIndex));*/
+                foreach (int sampleIndex in trainIndexes)
+                    train.AddSample(dataSet.GetX(sampleIndex), dataSet.GetY(sampleIndex));
 
                 DataSet test = new DataSet();
-                /*foreach (int sampleIndex in testIndexes)
-                    test.AddSample(dataSet.GetX(sampleIndex), dataSet.GetY(sampleIndex));*/
-
-                using (StreamReader reader = new StreamReader("data.txt"))
-                {
-                    string[] caption = reader.ReadLine().Split(' ');
-                    int trainSize = Convert.ToInt32(caption[0]);
-                    int testSize = Convert.ToInt32(caption[1]);
-                    int instanceSize = Convert.ToInt32(caption[2]);
-
-                    for (int i = 0; i < trainSize; i++)
-                    {
-                        string[] row = reader.ReadLine().Split(' ');
-                        double[] x = new double[instanceSize - 1];
-                        double y;
-                        for (int n = 0; n < instanceSize - 1; n++)
-                            x[n] = Convert.ToDouble(row[n]);
-                        y = Convert.ToDouble(row[instanceSize - 1]);
-
-                        train.AddSample(x, y);
-                        dataSet.AddSample(x, y);
-                    }
-
-                    for (int i = 0; i < testSize; i++)
-                    {
-                        string[] row = reader.ReadLine().Split(' ');
-                        double[] x = new double[instanceSize - 1];
-                        double y;
-                        for (int n = 0; n < instanceSize - 1; n++)
-                            x[n] = Convert.ToDouble(row[n]);
-                        y = Convert.ToDouble(row[instanceSize - 1]);
-
-                        test.AddSample(x, y);
-                        dataSet.AddSample(x, y);
-                    }
-                }
+                foreach (int sampleIndex in testIndexes)
+                    test.AddSample(dataSet.GetX(sampleIndex), dataSet.GetY(sampleIndex));
 
                 BackPropagationLearner learner = new BackPropagationLearner(neuroNet, train) {Speed = speed};
 
@@ -145,9 +112,9 @@ namespace LearningAlgorithms
                         testError1 = testError2 = 0.0;
                         trainError1 = trainError2 = 0.0;
 
+                        learner.Speed = speed;
                         learner.Learn(!isFirstIteration);
 
-                        isFirstIteration = false;
                         currentIteration++;
 
                         for (int i = 0; i < train.Size; i++)
@@ -160,6 +127,8 @@ namespace LearningAlgorithms
                         }
                         trainError1 /= train.Size;
                         trainError2 /= 2.0;
+
+                        isFirstIteration = false;
 
                         for (int i = 0; i < test.Size; i++)
                         {
@@ -184,7 +153,8 @@ namespace LearningAlgorithms
                                 testError1,
                                 testError2,
                                 currentIteration,
-                                iterations
+                                iterations,
+                                speed
                             });
                     } while (currentIteration < iterations && !worker.CancellationPending &&
                              requiredError <= Convert.ToInt32(testError1*100.0));
@@ -318,6 +288,7 @@ namespace LearningAlgorithms
             lbTestError.Text = String.Format("Ошибка на тестовой выборке: {0}% ({1})", Convert.ToInt32(pars[2]*100), pars[3]);
             lbTrainError.Text = String.Format("Ошибка на обучающей выборке: {0}% ({1})", Convert.ToInt32(pars[0] * 100), pars[1]);
             lbCurrentIter.Text = String.Format("Итерация {0} из {1}", pars[4], pars[5]);
+            tbSpeed.Text = Convert.ToString(pars[6]);
         }
 
         private void btnWriteResult_Click(object sender, EventArgs e)

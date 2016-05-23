@@ -115,6 +115,7 @@ namespace LearningAlgorithms
                             weights[i, j] += outs[i] * errByNeurons[j] * speed;
                     }
                 }
+
                 neuroNet.set_links(weights);
             }
         }

@@ -42,8 +42,14 @@
             this.tcInfoAboutNN = new System.Windows.Forms.TabControl();
             this.tpEditingNeuroNets = new System.Windows.Forms.TabPage();
             this.tpUsingNeuroNets = new System.Windows.Forms.TabPage();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.cbEnum = new System.Windows.Forms.ComboBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.cbReal = new System.Windows.Forms.ComboBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.cbInt = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.gbUsingNeuroNets = new System.Windows.Forms.GroupBox();
-            this.button1 = new System.Windows.Forms.Button();
             this.btnDelete = new System.Windows.Forms.Button();
             this.lbLASelected = new System.Windows.Forms.Label();
             this.lbLAInfo = new System.Windows.Forms.Label();
@@ -60,13 +66,6 @@
             this.dgwNets = new System.Windows.Forms.DataGridView();
             this.gbTasksTree = new System.Windows.Forms.GroupBox();
             this.tvTaskSelections = new System.Windows.Forms.TreeView();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.cbInt = new System.Windows.Forms.ComboBox();
-            this.cbReal = new System.Windows.Forms.ComboBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.cbEnum = new System.Windows.Forms.ComboBox();
-            this.label3 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgwNeuroNets)).BeginInit();
             this.gbNeuroNets.SuspendLayout();
             this.gbParamsAF.SuspendLayout();
@@ -76,11 +75,11 @@
             this.tcInfoAboutNN.SuspendLayout();
             this.tpEditingNeuroNets.SuspendLayout();
             this.tpUsingNeuroNets.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             this.gbUsingNeuroNets.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgwLA)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgwNets)).BeginInit();
             this.gbTasksTree.SuspendLayout();
-            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // dgwNeuroNets
@@ -240,6 +239,7 @@
             // 
             // tpUsingNeuroNets
             // 
+            this.tpUsingNeuroNets.Controls.Add(this.groupBox1);
             this.tpUsingNeuroNets.Controls.Add(this.gbUsingNeuroNets);
             this.tpUsingNeuroNets.Controls.Add(this.gbTasksTree);
             this.tpUsingNeuroNets.Location = new System.Drawing.Point(4, 29);
@@ -250,13 +250,97 @@
             this.tpUsingNeuroNets.Text = "Использование нейронных сетей";
             this.tpUsingNeuroNets.UseVisualStyleBackColor = true;
             // 
+            // groupBox1
+            // 
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.groupBox1.Controls.Add(this.cbEnum);
+            this.groupBox1.Controls.Add(this.label3);
+            this.groupBox1.Controls.Add(this.cbReal);
+            this.groupBox1.Controls.Add(this.label2);
+            this.groupBox1.Controls.Add(this.cbInt);
+            this.groupBox1.Controls.Add(this.label1);
+            this.groupBox1.Font = new System.Drawing.Font("Book Antiqua", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.groupBox1.Location = new System.Drawing.Point(9, 382);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(290, 201);
+            this.groupBox1.TabIndex = 18;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Нормализация";
+            // 
+            // cbEnum
+            // 
+            this.cbEnum.Font = new System.Drawing.Font("Book Antiqua", 12F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.cbEnum.FormattingEnabled = true;
+            this.cbEnum.Items.AddRange(new object[] {
+            "Целое",
+            "Целое нормализованное",
+            "Действительное нормализованное"});
+            this.cbEnum.Location = new System.Drawing.Point(10, 164);
+            this.cbEnum.Name = "cbEnum";
+            this.cbEnum.Size = new System.Drawing.Size(267, 28);
+            this.cbEnum.TabIndex = 5;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Book Antiqua", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label3.Location = new System.Drawing.Point(6, 141);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(124, 20);
+            this.label3.TabIndex = 4;
+            this.label3.Text = "Перечислимые";
+            // 
+            // cbReal
+            // 
+            this.cbReal.Font = new System.Drawing.Font("Book Antiqua", 12F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.cbReal.FormattingEnabled = true;
+            this.cbReal.Items.AddRange(new object[] {
+            "Действительное",
+            "Целое нормализованное",
+            "Действительное нормализованное"});
+            this.cbReal.Location = new System.Drawing.Point(10, 110);
+            this.cbReal.Name = "cbReal";
+            this.cbReal.Size = new System.Drawing.Size(267, 28);
+            this.cbReal.TabIndex = 3;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Book Antiqua", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label2.Location = new System.Drawing.Point(6, 87);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(135, 20);
+            this.label2.TabIndex = 2;
+            this.label2.Text = "Действительные";
+            // 
+            // cbInt
+            // 
+            this.cbInt.Font = new System.Drawing.Font("Book Antiqua", 12F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.cbInt.FormattingEnabled = true;
+            this.cbInt.Items.AddRange(new object[] {
+            "Целое",
+            "Целое нормализованное",
+            "Действительное нормализованное"});
+            this.cbInt.Location = new System.Drawing.Point(10, 56);
+            this.cbInt.Name = "cbInt";
+            this.cbInt.Size = new System.Drawing.Size(267, 28);
+            this.cbInt.TabIndex = 1;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Book Antiqua", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label1.Location = new System.Drawing.Point(6, 33);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(59, 20);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "Целые";
+            // 
             // gbUsingNeuroNets
             // 
             this.gbUsingNeuroNets.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.gbUsingNeuroNets.Controls.Add(this.groupBox1);
-            this.gbUsingNeuroNets.Controls.Add(this.button1);
             this.gbUsingNeuroNets.Controls.Add(this.btnDelete);
             this.gbUsingNeuroNets.Controls.Add(this.lbLASelected);
             this.gbUsingNeuroNets.Controls.Add(this.lbLAInfo);
@@ -278,18 +362,6 @@
             this.gbUsingNeuroNets.TabIndex = 8;
             this.gbUsingNeuroNets.TabStop = false;
             this.gbUsingNeuroNets.Text = "Обученные/необученные нейронные сети";
-            // 
-            // button1
-            // 
-            this.button1.Font = new System.Drawing.Font("Book Antiqua", 12F);
-            this.button1.Location = new System.Drawing.Point(368, 89);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(85, 31);
-            this.button1.TabIndex = 17;
-            this.button1.Text = "Test";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Visible = false;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // btnDelete
             // 
@@ -392,7 +464,7 @@
             this.dgwLA.Location = new System.Drawing.Point(9, 375);
             this.dgwLA.Name = "dgwLA";
             this.dgwLA.RowTemplate.DefaultCellStyle.Font = new System.Drawing.Font("Book Antiqua", 9.75F);
-            this.dgwLA.Size = new System.Drawing.Size(282, 195);
+            this.dgwLA.Size = new System.Drawing.Size(618, 196);
             this.dgwLA.TabIndex = 7;
             this.dgwLA.MouseUp += new System.Windows.Forms.MouseEventHandler(this.dgwLA_MouseUp);
             // 
@@ -454,7 +526,7 @@
             this.gbTasksTree.Font = new System.Drawing.Font("Book Antiqua", 18F);
             this.gbTasksTree.Location = new System.Drawing.Point(6, 6);
             this.gbTasksTree.Name = "gbTasksTree";
-            this.gbTasksTree.Size = new System.Drawing.Size(293, 577);
+            this.gbTasksTree.Size = new System.Drawing.Size(293, 370);
             this.gbTasksTree.TabIndex = 7;
             this.gbTasksTree.TabStop = false;
             this.gbTasksTree.Text = "Дерево задач";
@@ -465,89 +537,9 @@
             this.tvTaskSelections.Font = new System.Drawing.Font("Book Antiqua", 14.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.tvTaskSelections.Location = new System.Drawing.Point(3, 33);
             this.tvTaskSelections.Name = "tvTaskSelections";
-            this.tvTaskSelections.Size = new System.Drawing.Size(287, 541);
+            this.tvTaskSelections.Size = new System.Drawing.Size(287, 334);
             this.tvTaskSelections.TabIndex = 5;
             this.tvTaskSelections.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvTaskSelections_AfterSelect);
-            // 
-            // groupBox1
-            // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.groupBox1.Controls.Add(this.cbEnum);
-            this.groupBox1.Controls.Add(this.label3);
-            this.groupBox1.Controls.Add(this.cbReal);
-            this.groupBox1.Controls.Add(this.label2);
-            this.groupBox1.Controls.Add(this.cbInt);
-            this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Font = new System.Drawing.Font("Book Antiqua", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.groupBox1.Location = new System.Drawing.Point(297, 375);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(329, 194);
-            this.groupBox1.TabIndex = 18;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Преобразование значений параметров";
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(17, 35);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(54, 20);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Целые";
-            // 
-            // cbInt
-            // 
-            this.cbInt.FormattingEnabled = true;
-            this.cbInt.Items.AddRange(new object[] {
-            "Целое",
-            "Целое нормализованное",
-            "Действительное нормализованное"});
-            this.cbInt.Location = new System.Drawing.Point(148, 32);
-            this.cbInt.Name = "cbInt";
-            this.cbInt.Size = new System.Drawing.Size(167, 28);
-            this.cbInt.TabIndex = 1;
-            // 
-            // cbReal
-            // 
-            this.cbReal.FormattingEnabled = true;
-            this.cbReal.Items.AddRange(new object[] {
-            "Действительное",
-            "Целое нормализованное",
-            "Действительное нормализованное"});
-            this.cbReal.Location = new System.Drawing.Point(148, 66);
-            this.cbReal.Name = "cbReal";
-            this.cbReal.Size = new System.Drawing.Size(167, 28);
-            this.cbReal.TabIndex = 3;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(17, 69);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(122, 20);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "Действительные";
-            // 
-            // cbEnum
-            // 
-            this.cbEnum.FormattingEnabled = true;
-            this.cbEnum.Items.AddRange(new object[] {
-            "Целое",
-            "Целое нормализованное",
-            "Действительное нормализованное"});
-            this.cbEnum.Location = new System.Drawing.Point(148, 100);
-            this.cbEnum.Name = "cbEnum";
-            this.cbEnum.Size = new System.Drawing.Size(167, 28);
-            this.cbEnum.TabIndex = 5;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(17, 103);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(114, 20);
-            this.label3.TabIndex = 4;
-            this.label3.Text = "Перечислимые";
             // 
             // NeuroNetsMainWindow
             // 
@@ -569,13 +561,13 @@
             this.tcInfoAboutNN.ResumeLayout(false);
             this.tpEditingNeuroNets.ResumeLayout(false);
             this.tpUsingNeuroNets.ResumeLayout(false);
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.gbUsingNeuroNets.ResumeLayout(false);
             this.gbUsingNeuroNets.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgwLA)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgwNets)).EndInit();
             this.gbTasksTree.ResumeLayout(false);
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -612,7 +604,6 @@
         private System.Windows.Forms.Label lbTaskInfo;
         private System.Windows.Forms.Label lbRedactingInfo;
         private System.Windows.Forms.Button btnDelete;
-        private System.Windows.Forms.Button button1;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.ComboBox cbEnum;
         private System.Windows.Forms.Label label3;
