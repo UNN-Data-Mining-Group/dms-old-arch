@@ -35,7 +35,7 @@ namespace DesisionTrees
             tvTaskSelections.Nodes.Clear();
 
             dgwTrees.Rows.Clear();
-           
+
             List<Tuple<int, string, int>> ls = dbHandler.SelectAllTasks();
             foreach (Tuple<int, string, int> item in ls)
             {
@@ -115,15 +115,19 @@ namespace DesisionTrees
 
         //    dgwLA.AutoResizeColumns();
         //}
-        
+
         private void FillDesTreeUsingTable()
         {
             dgwTrees.ColumnHeadersDefaultCellStyle.Font = new Font("Book Antiqua", 9);
             dgwTrees.Rows.Clear();
-            List<Tree> tree_list = sqlManager.GetTreeWithRequest("SELECT * FROM TREE WHERE TASK_ID = (SELECT TASK_ID FROM SELECTION WHERE NAME =  '" + tvTaskSelections.SelectedNode.Text + "')");        
+            List<Tree> tree_list = new List<Tree>();
+            if(tvTaskSelections.SelectedNode.Parent != null) 
+            {
+                tree_list = sqlManager.GetTreeWithRequest("SELECT * FROM TREE WHERE TASK_ID = (SELECT ID FROM TASK WHERE NAME =  '" + tvTaskSelections.SelectedNode.Parent.Text + "')");
+            }
             dgwTrees.Columns.Clear();
 
-            
+
             dgwTrees.Columns.Add("TREE_NAME", "Имя дерева");
             dgwTrees.Columns.Add("TASK_NAME", "Задача");
             dgwTrees.Columns.Add("SELECTION_NAME", "Выборка");
@@ -132,14 +136,14 @@ namespace DesisionTrees
                 DataGridViewColumn column = dgwTrees.Columns[i];
                 column.Width = dgwTrees.Size.Width / 3 - 17;
             }
-            
-            foreach(Tree tree in tree_list)
+
+            foreach (Tree tree in tree_list)
             {
                 string[] Row = new string[3];
                 Row[0] = tree.TREE_NAME;
                 Row[1] = sqlManager.GetTasksWithRequest("SELECT * FROM TASK WHERE ID = " + tree.TASK_ID)[0].Name;
                 Row[2] = sqlManager.GetOneSelectionWithRequest("SELECT * FROM SELECTION WHERE ID =" + tree.SELECTION_ID).Name;
-                dgwTrees.Rows.Add(Row);                
+                dgwTrees.Rows.Add(Row);
             }
 
         }
@@ -149,7 +153,7 @@ namespace DesisionTrees
             InitializeComponent();
             dbHandler = new DataBaseHandler();
             desTreeInfo = new DataContainer<List<string[]>>();
-           // learningInfo = new DataContainer<DataContainer<List<string>>>();
+            // learningInfo = new DataContainer<DataContainer<List<string>>>();
             LoadInformationForUsingDesTrees();
         }
 
@@ -218,7 +222,7 @@ namespace DesisionTrees
                     j++;
                     continue;
                 }
-                if(param.Range[i] != ' ')
+                if (param.Range[i] != ' ')
                     newClassInfo[j].class_name += param.Range[i];
             }
             return newClassInfo;
@@ -228,7 +232,7 @@ namespace DesisionTrees
         {
             Parametr sortParameter = sqlManager.GetOneParametrWithRequest("SELECT * FROM PARAM WHERE( NUMBER = '0' AND TASK_ID = (SELECT TASK_ID FROM SELECTION WHERE NAME =  '" + tvTaskSelections.SelectedNode.Text + "'))");
             List<String> paramValues = new List<String>();
-            
+
             //educationTable.BubbleSortByParam(0, sortParameter);
             educationTable.QuickSortByParam(0, educationTable.Rows.Count - 1, 0, sortParameter);
             String param = educationTable.Rows[0][0].Value;
@@ -256,7 +260,7 @@ namespace DesisionTrees
             }
             return newClassInfo;
         }
-        
+
         public double GiniSplitCalc(VeryfiedClassInfo[] leftClassInf, VeryfiedClassInfo[] rightClassInf)
         {
             double res = 0;
@@ -271,10 +275,10 @@ namespace DesisionTrees
             {
                 res += ((Math.Pow(leftClassInf[i].number_of_checked, 2) / examplCntLeft) + (Math.Pow(rightClassInf[i].number_of_checked, 2) / examplCntRight));
             }
-                return res;
+            return res;
         }
 
-        public void FindBetterParametr(EducationTable education_table,ref int index_of_parametr,ref string best_value_for_split, ref Parametr _param)
+        public void FindBetterParametr(EducationTable education_table, ref int index_of_parametr, ref string best_value_for_split, ref Parametr _param)
         {
             index_of_parametr = 0;
             best_value_for_split = "";
@@ -282,7 +286,7 @@ namespace DesisionTrees
             VeryfiedClassInfo[] rightClassInf = ClassInfoInit();//ClassInfoInit2(education_table);
             Parametr param;
             double giniValue = -100000;
-            for(int index = 1; index < education_table.ParameterCount; index++)
+            for (int index = 1; index < education_table.ParameterCount; index++)
             {
                 param = sqlManager.GetOneParametrWithRequest("SELECT * FROM PARAM WHERE ID ='" + education_table.Rows.ElementAt(1)[index].ParametrID + "'");
                 //education_table.BubbleSortByParam(index, param);
@@ -351,7 +355,7 @@ namespace DesisionTrees
                             continue;
                         }
                         if (param.Range[i] != ' ')
-                            variables[j]+= param.Range[i];
+                            variables[j] += param.Range[i];
                     }
 
                     for (int j = 0; j < number_of_var; j++)
@@ -397,7 +401,7 @@ namespace DesisionTrees
             }
         }
 
-        public void SplitEducationTable(EducationTable education_table,Rule split_rule,Parametr param, ref EducationTable left_table, ref EducationTable right_table)
+        public void SplitEducationTable(EducationTable education_table, Rule split_rule, Parametr param, ref EducationTable left_table, ref EducationTable right_table)
         {
             if ((param.Type == TypeParametr.Real) || (param.Type == TypeParametr.Int))
             {
@@ -490,13 +494,13 @@ namespace DesisionTrees
                         tree_node.rule.value = clinf.class_name;
                     }
                 }
-                
+
             }
 
 
-            
 
-        }       
+
+        }
 
         private void SaveRuleToDB(Rule rule)
         {
@@ -527,7 +531,7 @@ namespace DesisionTrees
             else
             {
                 SaveRuleToDB(node.rule);
-                int rule_id = sqlManager.GetMaxFeature("SELECT MAX(ID) FROM RULE","MAX(ID)");
+                int rule_id = sqlManager.GetMaxFeature("SELECT MAX(ID) FROM RULE", "MAX(ID)");
                 String sqlReqStr = "INSERT INTO NODE (ID, LEFT_CHILD_ID, RIGHT_CHILD_ID, RULE_ID, IS_LEAF) " +
                 "VALUES('" + node_id + "','0','0','" + rule_id + "','1');";
                 int state = sqlManager.SendInsertRequest(sqlReqStr);
@@ -555,18 +559,58 @@ namespace DesisionTrees
 
         private void btnBuildTree_Click(object sender, EventArgs e)
         {
-            
+
             TreeNameInputForm treeNameForm = new TreeNameInputForm();
             treeNameForm.Owner = this;
             treeNameForm.ShowDialog();
             //treeNameForm.
 
-            Selection selection = sqlManager.GetOneSelectionWithRequest("SELECT * FROM SELECTION WHERE NAME ='"+tvTaskSelections.SelectedNode.Text+"'");
+            Selection selection = sqlManager.GetOneSelectionWithRequest("SELECT * FROM SELECTION WHERE NAME ='" + tvTaskSelections.SelectedNode.Text + "'");
             arrParams = sqlManager.GetParamsWithRequest("SELECT * FROM PARAM WHERE TASK_ID = (SELECT TASK_ID FROM SELECTION WHERE NAME =  '" + tvTaskSelections.SelectedNode.Text + "')");
             List<ValueParametr> arrValues = sqlManager.GetValuesWithRequest("select * from VALUE_PARAM where SELECTION_ID=(select ID from SELECTION where NAME ='" + tvTaskSelections.SelectedNode.Text + "')");
             EducationTable educatTable = new EducationTable(arrValues, arrParams);
             TreeNode root = new TreeNode();
-            int root_id = 1 + sqlManager.GetMaxFeature("SELECT COUNT(1) FROM NODE","COUNT(1)");
+            int root_id = 1 + sqlManager.GetMaxFeature("SELECT COUNT(1) FROM NODE", "COUNT(1)");
+
+            for (int i = 0; i < educatTable.Rows.Count; i++)
+            {
+                var tmp = educatTable.Rows[i];
+                for (int j = i + 1; j < educatTable.Rows.Count; j++)
+                {
+                    bool flag = true;
+                    for (int j1 = 1; j1 < educatTable.Rows[j].Length; j1++)
+                    {
+                        if (tmp[j1].Value != educatTable.Rows[j][j1].Value)
+                        {
+                            flag = false;
+                        }
+                    }
+                    if (flag == true)
+                    {
+                        educatTable.Rows.RemoveAt(j);
+                    }
+                }
+            }
+            for (int i = 0; i < educatTable.Rows.Count; i++)
+            {
+                var tmp = educatTable.Rows[i];
+                for (int j = i + 1; j < educatTable.Rows.Count; j++)
+                {
+                    bool flag = true;
+                    for (int j1 = 1; j1 < educatTable.Rows[j].Length; j1++)
+                    {
+                        if (tmp[j1].Value != educatTable.Rows[j][j1].Value)
+                        {
+                            flag = false;
+                        }
+                    }
+                    if (flag == true)
+                    {
+                        educatTable.Rows.RemoveAt(j);
+                    }
+                }
+            }
+            
             treeBuilding(educatTable, root);
 
             SaveTreeToDB(root, newTreeName, root_id, selection.TaskID, selection.ID);
@@ -588,7 +632,7 @@ namespace DesisionTrees
         private void btnUse_Click(object sender, EventArgs e)
         {
             arrParams = sqlManager.GetParamsWithRequest("SELECT * FROM PARAM WHERE TASK_ID = (SELECT TASK_ID FROM SELECTION WHERE NAME =  '" + tvTaskSelections.SelectedNode.Text + "')");
-            TreeUsingForm treeUsingFrm = new TreeUsingForm(arrParams,usedTreeRootID);
+            TreeUsingForm treeUsingFrm = new TreeUsingForm(arrParams, usedTreeRootID);
             treeUsingFrm.Show();
         }
 
@@ -680,26 +724,26 @@ namespace DesisionTrees
             }
 
 
-                //VeryfiedClassInfo[] ClassInf = ClassInfoInit2(educatTable);
-                //String str = "";
-                //for (int i = 0; i < ClassInf.Length; i++)
-                //{
-                //    str += ClassInf[i].class_name.ToString() + '|';
-                //}
+            //VeryfiedClassInfo[] ClassInf = ClassInfoInit2(educatTable);
+            //String str = "";
+            //for (int i = 0; i < ClassInf.Length; i++)
+            //{
+            //    str += ClassInf[i].class_name.ToString() + '|';
+            //}
 
-                treeBuilding(educatTable, root);
+            treeBuilding(educatTable, root);
 
             double learningMistake = 0;
             int testMistake = 0;
             String answer = "";
             String[] input_row = new String[arrParams.Count - 1];
             for (int i = 0; i < educatTable.Rows.Count; i++)
-            {                
-                for (int j = 0; j < arrParams.Count-1; j++)
+            {
+                for (int j = 0; j < arrParams.Count - 1; j++)
                 {
-                    input_row[j] = educatTable.Rows[i][j+1].Value.ToString(); //dgwInputVal.Rows[0].Cells[i].Value.ToString();
+                    input_row[j] = educatTable.Rows[i][j + 1].Value.ToString(); //dgwInputVal.Rows[0].Cells[i].Value.ToString();
                 }
-                answer = TreeUsing(input_row, root,arrParams);
+                answer = TreeUsing(input_row, root, arrParams);
                 if (answer == educatTable.Rows[i][0].Value.ToString())
                 {
                     learningMistake = learningMistake + 1;
@@ -720,7 +764,7 @@ namespace DesisionTrees
                 }
             }
             testMistake = 100 - 100 * testMistake / testTable.Rows.Count;
-            lblTestResult.Text = "test = "+ testMistake + "  learn = " + learningMistake;
+            lblTestResult.Text = "test = " + testMistake + "  learn = " + learningMistake;
 
         }
 
@@ -754,6 +798,6 @@ namespace DesisionTrees
             }
             return curNode.rule.value;
         }
-        
+
     }
 }
